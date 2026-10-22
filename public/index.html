@@ -53,7 +53,7 @@ table.t{width:100%;border-collapse:collapse}.t th{font-size:13px;color:var(--mut
 <script src="/xlsx.full.min.js"></script>
 <script>
 let S={members:[],items:[],perfs:[],loans:[]},P=localStorage.pw||'',v={};
-let U={tab:'stock',sub:'members',q:'',arch:0,perf:localStorage.perf||'',mem:'',item:'',qty:1,note:'',f:'',fm:'',ft:'',fs:'',ot:'',oq:'',mr:'',rp:'',rm:'',rs:'',edit:null};
+let U={tab:'stock',sub:'members',q:'',arch:0,perf:localStorage.perf||'',mem:'',item:'',qty:1,note:'',f:'',fm:'',ft:'',fs:'',ot:'',oq:'',mr:'',fc:'',oc:'',sc:'',rp:'',rm:'',rs:'',edit:null};
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>'&#'+c.charCodeAt(0)+';'),T=s=>new Date(s).toLocaleString([], {dateStyle:'medium',timeStyle:'short'});
 const it=id=>S.items.find(i=>i.id==id)||{},mb=id=>S.members.find(m=>m.id==id)||{},pf=id=>S.perfs.find(p=>p.id==id)||{};
 const lab=i=>(i.name||'')+(i.size?' · '+i.size:''),today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
@@ -61,7 +61,7 @@ const perfOpts=s=>S.perfs.map(p=>`<option value=${p.id} ${p.id==s?'selected':''}
 function toast(m){const t=$('#toast');t.textContent=m;t.className='show';clearTimeout(toast.h);toast.h=setTimeout(()=>t.className='',2200)}
 async function api(b){let r;try{r=await fetch('/api',{method:b?'POST':'GET',cache:'no-store',headers:{'x-pass':P,'content-type':'application/json'},body:b&&JSON.stringify(b)})}catch(e){alert('No connection. Please try again.');throw e}
  if(r.status==401){const p=prompt('Password');if(!p)throw 0;P=p;localStorage.pw=p;return api(b)}
- if(!r.ok&&r.status!=409){alert('Error '+r.status);throw 0}return r.json()}
+ if(!r.ok&&r.status!=409){let m='Error '+r.status;try{m=(await r.json()).err||m}catch(e){}alert(m);throw 0}return r.json()}
 async function load(){S=await api();render()}
 async function poll(){const a=document.activeElement,busy=a&&a.closest('#app')&&/INPUT|SELECT/.test(a.tagName);
  if(document.hidden||busy||$('#modal').innerHTML||[...document.querySelectorAll('#app input[id^=n]')].some(e=>e.value))return;
@@ -72,21 +72,22 @@ const TABS={stock:'📦 Stock',out:'📤 Check out',ret:'📥 Returns',manage:'�
 function render(){if(!S.perfs.some(p=>p.id==U.perf))U.perf=S.perfs[0]?.id||'';
  $('#nav').innerHTML=Object.entries(TABS).map(([k,l])=>`<button class="${k==U.tab?'on':''}" onclick="U.tab='${k}';U.q='';render();scrollTo(0,0)">${l}</button>`).join('');$('#app').innerHTML=v[U.tab]()}
 /* STOCK */
+const cats=()=>[...new Set(S.items.map(i=>i.category).filter(Boolean))].sort();
 const chip=(l,on,fn)=>`<button class="chip ${on?'on':''}" onclick="${fn}">${l}</button>`;
-const stockTables=()=>{const q=U.q.toLowerCase();return ['costume','shirt'].filter(k=>!U.ft||U.ft==k).map(k=>{const r=S.items.filter(i=>{const n=i.total-i.out;return !i.archived&&i.kind==k&&(i.name+i.size).toLowerCase().includes(q)&&(!U.fs||(U.fs=='in'?n>0:U.fs=='out'?i.out>0:n<=0))});
- return `<div class=card><h3>${k=='costume'?'Costumes':'Shirts'}</h3>`+(r.length?`<table class=t><tr><th>Name<th>Size<th class=r>Total<th class=r>Out<th class=r>In store</tr>`+r.map(i=>`<tr><td>${esc(i.name)}<td>${esc(i.size)}<td class=r><input type=number min=0 value=${i.total} onchange="act({a:'save',t:'items',row:{...it(${i.id}),total:+this.value}},'Saved ✓')"><td class=r>${i.out}<td class="r ${i.total-i.out==0?'zero':''}"><b>${i.total-i.out}</b></tr>`).join('')+'</table>':'<p class=mut>No items match.</p>')+'</div>'}).join('')};
+const stockTables=()=>{const q=U.q.toLowerCase();return ['costume','shirt'].filter(k=>!U.ft||U.ft==k).map(k=>{const r=S.items.filter(i=>{const n=i.total-i.out;return !i.archived&&i.kind==k&&(!U.fc||i.category==U.fc)&&(i.name+i.size).toLowerCase().includes(q)&&(!U.fs||(U.fs=='in'?n>0:U.fs=='out'?i.out>0:n<=0))});
+ return `<div class=card><h3>${k=='costume'?'Costumes':'Shirts'}</h3>`+(r.length?`<table class=t><tr><th>Name<th>Size<th class=r>Total<th class=r>Out<th class=r>In store</tr>`+r.map(i=>`<tr><td>${esc(i.name)}${i.category?`<div class=sub>${esc(i.category)}</div>`:''}<td>${esc(i.size)}<td class=r><input type=number min=0 value=${i.total} onchange="act({a:'save',t:'items',row:{...it(${i.id}),total:+this.value}},'Saved ✓')"><td class=r>${i.out}<td class="r ${i.total-i.out==0?'zero':''}"><b>${i.total-i.out}</b></tr>`).join('')+'</table>':'<p class=mut>No items match.</p>')+'</div>'}).join('')};
 v.stock=()=>{const t=S.items.filter(i=>!i.archived),sum=k=>t.reduce((a,i)=>a+i[k],0),tile=(l,n,c='')=>`<div class="tile ${c}"><div class=n>${n}</div><div class=l>${l}</div></div>`;
  return `<div class=stats>${tile('Total pieces',sum('total'))}${tile('Out',sum('out'))}${tile('In store',sum('total')-sum('out'),'hl')}</div>
 <div class=card><input placeholder="🔍 Search items…" value="${esc(U.q)}" oninput="U.q=this.value;$('#lst').innerHTML=stockTables()">
 <div class=chips>${chip('All',!U.ft,"U.ft='';render()")}${chip('Costumes',U.ft=='costume',"U.ft='costume';render()")}${chip('Shirts',U.ft=='shirt',"U.ft='shirt';render()")}</div>
-<div class=chips>${chip('Any status',!U.fs,"U.fs='';render()")}${chip('In store',U.fs=='in',"U.fs='in';render()")}${chip('Out now',U.fs=='out',"U.fs='out';render()")}${chip('None left',U.fs=='none',"U.fs='none';render()")}</div></div><div id=lst>${stockTables()}</div>`};
+<div class=chips>${chip('Any status',!U.fs,"U.fs='';render()")}${chip('In store',U.fs=='in',"U.fs='in';render()")}${chip('Out now',U.fs=='out',"U.fs='out';render()")}${chip('None left',U.fs=='none',"U.fs='none';render()")}</div>${cats().length?`<div class=chips>${chip('Any category',!U.fc,"U.fc='';render()")}${cats().map((c,i)=>chip(esc(c),U.fc==c,`U.fc=cats()[${i}];render()`)).join('')}</div>`:''}</div><div id=lst>${stockTables()}</div>`};
 /* CHECK OUT */
-const itemOpts=()=>{const q=(U.oq||'').toLowerCase(),av=S.items.filter(i=>!i.archived&&i.total-i.out>0&&(!U.ot||i.kind==U.ot)&&(i.name+i.size).toLowerCase().includes(q)),og=(k,l)=>{const r=av.filter(i=>i.kind==k);return r.length?`<optgroup label="${l}">${r.map(i=>`<option value=${i.id} ${U.item==i.id?'selected':''}>${esc(lab(i))} — ${i.total-i.out} left</option>`).join('')}</optgroup>`:''};return og('costume','Costumes')+og('shirt','Shirts')||'<option value="">No match</option>'};
+const itemOpts=()=>{const q=(U.oq||'').toLowerCase(),av=S.items.filter(i=>!i.archived&&i.total-i.out>0&&(!U.ot||i.kind==U.ot)&&(!U.oc||i.category==U.oc)&&(i.name+i.size).toLowerCase().includes(q)),og=(k,l)=>{const r=av.filter(i=>i.kind==k);return r.length?`<optgroup label="${l}">${r.map(i=>`<option value=${i.id} ${U.item==i.id?'selected':''}>${esc(lab(i))} — ${i.total-i.out} left</option>`).join('')}</optgroup>`:''};return og('costume','Costumes')+og('shirt','Shirts')||'<option value="">No match</option>'};
 v.out=()=>{const cur=S.loans.filter(l=>l.perf_id==U.perf);
  return `<div class=card><div class=grid>
 <div><label class=f>Performance</label><div class=row style="flex-wrap:nowrap"><select onchange="U.perf=this.value;localStorage.perf=U.perf;render()">${S.perfs.length?perfOpts(U.perf):'<option value="">No performance yet</option>'}</select><button class="btn ghost" onclick="U.sub='perfs';openForm()">+ New</button></div></div>
 <div><label class=f>Member</label><select id=mem onchange="U.mem=this.value"><option value="">Choose member…</option>${S.members.filter(m=>m.active).map(m=>`<option value=${m.id} ${U.mem==m.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select></div>
-<div class=span><label class=f>Item</label><div class=row style="flex-wrap:nowrap"><input placeholder="🔍 Filter items…" value="${esc(U.oq)}" oninput="U.oq=this.value;$('#item').innerHTML=itemOpts()">${chip('All',!U.ot,"U.ot='';render()")}${chip('Costumes',U.ot=='costume',"U.ot='costume';render()")}${chip('Shirts',U.ot=='shirt',"U.ot='shirt';render()")}</div><select id=item style="margin-top:8px" onchange="U.item=this.value">${itemOpts()}</select></div>
+<div class=span><label class=f>Item</label><div class=row><input style="flex:1 1 170px" placeholder="🔍 Filter items…" value="${esc(U.oq)}" oninput="U.oq=this.value;$('#item').innerHTML=itemOpts()">${chip('All',!U.ot,"U.ot='';render()")}${chip('Costumes',U.ot=='costume',"U.ot='costume';render()")}${chip('Shirts',U.ot=='shirt',"U.ot='shirt';render()")}${cats().length?`<select style="width:auto;flex:none" onchange="U.oc=this.value;$('#item').innerHTML=itemOpts()"><option value="">All categories</option>${cats().map(c=>`<option ${U.oc==c?'selected':''}>${esc(c)}</option>`).join('')}</select>`:''}</div><select id=item style="margin-top:8px" onchange="U.item=this.value">${itemOpts()}</select></div>
 <div><label class=f>Quantity</label><div class=qty><button onclick="qty(-1)">−</button><input id=qty type=number min=1 value=${U.qty} onchange="U.qty=+this.value||1"><button onclick="qty(1)">+</button></div></div>
 <div class=span><label class=f>Remarks (optional)</label><input placeholder="e.g. slightly loose, missing a button" value="${esc(U.note)}" oninput="U.note=this.value"></div></div>
 <button class="btn wide" style="margin-top:16px" onclick=give()>Give out</button></div>
@@ -103,29 +104,29 @@ v.ret=()=>{const f=U.f,g={};S.loans.filter(l=>!l.returned_at&&(!f||l.perf_id==f)
 async function ret(ids){await act({a:'ret',rows:ids.map(id=>({id,cond:$('#c'+id).value,note:$('#n'+id).value}))},'Returned ✓')}
 /* MANAGE */
 const KINDS={members:'Members',costume:'Costumes',shirt:'Shirts',perfs:'Performances'};
-v.manage=()=>`<div class=seg>${Object.entries(KINDS).map(([k,l])=>`<button class="${U.sub==k?'on':''}" onclick="U.sub='${k}';U.q='';render()">${l}</button>`).join('')}</div>
+v.manage=()=>`<div class=seg>${Object.entries(KINDS).map(([k,l])=>`<button class="${U.sub==k?'on':''}" onclick="U.sub='${k}';U.q='';U.sc='';U.mr='';render()">${l}</button>`).join('')}</div>
 <div class=card><div class=row style="flex-wrap:nowrap"><input placeholder="Search…" value="${esc(U.q)}" oninput="U.q=this.value;$('#lst').innerHTML=mlist()"><button class=btn onclick="openForm()">+ Add</button></div>
-${U.sub=='members'?`<select style="margin-top:10px" onchange="U.mr=this.value;$('#lst').innerHTML=mlist()"><option value="">All roles</option>${[...new Set(S.members.map(m=>m.role).filter(Boolean))].map(r=>`<option ${U.mr==r?'selected':''}>${esc(r)}</option>`).join('')}</select>`:''}${U.sub=='perfs'?'':`<label class=chk><input type=checkbox ${U.arch?'checked':''} onchange="U.arch=this.checked?1:0;$('#lst').innerHTML=mlist()">Show ${U.sub=='members'?'inactive':'archived'}</label>`}
+${U.sub=='members'?`<select style="margin-top:10px" onchange="U.mr=this.value;$('#lst').innerHTML=mlist()"><option value="">All roles</option>${[...new Set(S.members.map(m=>m.role).filter(Boolean))].map(r=>`<option ${U.mr==r?'selected':''}>${esc(r)}</option>`).join('')}</select>`:''}${(U.sub=='costume'||U.sub=='shirt')&&cats().length?`<select style="margin-top:10px" onchange="U.sc=this.value;$('#lst').innerHTML=mlist()"><option value="">All categories</option>${cats().map(c=>`<option ${U.sc==c?'selected':''}>${esc(c)}</option>`).join('')}</select>`:''}${U.sub=='perfs'?'':`<label class=chk><input type=checkbox ${U.arch?'checked':''} onchange="U.arch=this.checked?1:0;$('#lst').innerHTML=mlist()">Show ${U.sub=='members'?'inactive':'archived'}</label>`}
 <div id=lst style="margin-top:8px">${mlist()}</div></div>`;
 function mlist(){const q=U.q.toLowerCase(),s=U.sub;let r;
  if(s=='members')r=S.members.filter(m=>(U.arch||m.active)&&(!U.mr||m.role==U.mr)&&(m.name+(m.role||'')+(m.student_id||'')).toLowerCase().includes(q));
  else if(s=='perfs')r=S.perfs.filter(p=>(p.name+p.date).toLowerCase().includes(q));
- else r=S.items.filter(i=>i.kind==s&&(U.arch||!i.archived)&&(i.name+i.size).toLowerCase().includes(q));
+ else r=S.items.filter(i=>i.kind==s&&(U.arch||!i.archived)&&(!U.sc||i.category==U.sc)&&(i.name+i.size).toLowerCase().includes(q));
  const none='<p class=mut>Nothing yet. Tap “+ Add”.</p>';
  if(s=='costume'||s=='shirt'){const g={};r.forEach(i=>(g[i.name]??=[]).push(i));
-  return Object.values(g).map(a=>`<div class=grp><div class=row style="justify-content:space-between;flex-wrap:nowrap"><b>${esc(a[0].name)}</b><button class="btn ghost sm" onclick="openGrp(${a[0].id})">+ Size</button></div>`+a.map(x=>`<div class="li ${x.archived?'off':''}"><div class=g>${esc(x.size)} ${x.archived?'<span class=pill>Archived</span>':''}${x.remarks?`<div class=sub>${esc(x.remarks)}</div>`:''}</div><b>× ${x.total}</b><button class="btn ghost sm" onclick="openForm(${x.id})">Edit</button></div>`).join('')+'</div>').join('')||none}
+  return Object.values(g).map(a=>`<div class=grp><div class=row style="justify-content:space-between;flex-wrap:nowrap"><div><b>${esc(a[0].name)}</b>${a[0].category?` <span class=pill>${esc(a[0].category)}</span>`:''}</div><button class="btn ghost sm" onclick="openGrp(${a[0].id})">+ Size</button></div>`+a.map(x=>`<div class="li ${x.archived?'off':''}"><div class=g>${esc(x.size)} ${x.archived?'<span class=pill>Archived</span>':''}${x.remarks?`<div class=sub>${esc(x.remarks)}</div>`:''}</div><b>× ${x.total}</b><button class="btn ghost sm" onclick="openForm(${x.id})">Edit</button></div>`).join('')+'</div>').join('')||none}
  return r.map(x=>{const off=s=='members'?!x.active:0,sub=s=='members'?[x.role,x.student_id,x.wechat].filter(Boolean).join(' · '):x.date+' · '+S.loans.filter(l=>l.perf_id==x.id).length+' records';
   return `<div class="li ${off?'off':''}"><div class=g><b>${esc(x.name)}</b> ${off?'<span class=pill>Inactive</span>':''}<div class=sub>${esc(sub)}</div></div><button class="btn ghost sm" onclick="openForm(${x.id})">Edit</button></div>`}).join('')||none}
-const openGrp=id=>{const i=it(id);openForm(0,{name:i.name,remarks:i.remarks||''})};
+const openGrp=id=>{const i=it(id);openForm(0,{name:i.name,remarks:i.remarks||'',category:i.category||''})};
 const sizeRow=()=>'<div class=sz><input placeholder="Size (M, L… blank = One size)"><input type=number min=0 placeholder="Qty"><button class="btn ghost sm" onclick="this.parentNode.remove()">✕</button></div>';
 const addSize=()=>{$('#szs').insertAdjacentHTML('beforeend',sizeRow())};
 function openForm(id,pre){const s=U.sub,t=s=='members'?'members':s=='perfs'?'perfs':'items',row=id?{...(t=='members'?mb(id):t=='perfs'?pf(id):it(id))}:(s=='perfs'?{date:today()}:pre||{});U.edit={t,row,s};
  const fd=(k,l,ty='text',x='')=>`<div><label class=f>${l}</label><input id=m_${k} type=${ty} value="${esc(row[k])}" ${x}></div>`;
- const nm=s=='shirt'?'Name / design *':'Name *';
+ const nm=s=='shirt'?'Name / design *':'Name *',cf=fd('category','Category','text','list=cats placeholder="e.g. Top, Under layer, Skirt, Accessory"')+`<datalist id=cats>${cats().map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
  const fl=t=='members'?fd('name','Name *')+fd('student_id','Student ID 学号')+fd('wechat','WeChat')+fd('role','Role','text','list=roles placeholder="drummer, committee…"')+'<datalist id=roles><option>drummer<option>committee</datalist>'
   :t=='perfs'?fd('name','Performance name *')+fd('date','Date','date')
-  :id?fd('name',nm)+fd('size','Size (blank = One size)')+fd('total','Total quantity','number','min=0')+fd('remarks','Remarks')
-  :fd('name',nm)+fd('remarks','Remarks (optional)')+`<div><label class=f>Sizes and quantities</label><div id=szs class=form>${sizeRow()}</div><button class="btn ghost sm" style="margin-top:10px" onclick=addSize()>+ Add another size</button></div>`;
+  :id?fd('name',nm)+cf+fd('size','Size (blank = One size)')+fd('total','Total quantity','number','min=0')+fd('remarks','Remarks')
+  :fd('name',nm)+cf+fd('remarks','Remarks (optional)')+`<div><label class=f>Sizes and quantities</label><div id=szs class=form>${sizeRow()}</div><button class="btn ghost sm" style="margin-top:10px" onclick=addSize()>+ Add another size</button></div>`;
  const off=t=='members'?!row.active:row.archived,label={members:'member',perfs:'performance',costume:'costume',shirt:'shirt'}[s];
  $('#modal').innerHTML=`<div class=ov onclick="if(event.target==this)closeM()"><div class=md><h3>${id?'Edit':'Add'} ${label}</h3><div class=form>${fl}</div>
 <div class=row style="margin-top:20px"><button class=btn onclick="saveForm(0)">Save</button>${id?'':'<button class="btn ghost" onclick="saveForm(1)">Save &amp; add another</button>'}<button class="btn ghost" onclick=closeM()>Cancel</button></div>
@@ -133,15 +134,16 @@ ${id?`<div class=row style="margin-top:16px;padding-top:16px;border-top:1px soli
  setTimeout(()=>{const e=$('#m_name');e&&(!id&&!(pre&&pre.name))&&e.focus()},60)}
 const closeM=()=>$('#modal').innerHTML='';
 async function saveForm(again){const {t,row,s}=U.edit,r={...row},isNew=!row.id;
- ['name','student_id','wechat','role','date','size','total','remarks'].forEach(k=>{const e=$('#m_'+k);if(e)r[k]=e.type=='number'?+e.value||0:e.value.trim()});
+ ['name','student_id','wechat','role','date','size','total','remarks','category'].forEach(k=>{const e=$('#m_'+k);if(e)r[k]=e.type=='number'?+e.value||0:e.value.trim()});
  if(!r.name)return alert('Name is required.');if(t=='perfs'&&!r.date)return alert('Date is required.');
  if(t=='items'&&isNew){
   const rows=[...document.querySelectorAll('#szs .sz')].map(d=>{const i=d.querySelectorAll('input');return{size:i[0].value.trim(),qty:i[1].value}}).filter(x=>x.size||x.qty!=='');
   if(!rows.length)return alert('Enter at least one size with a quantity (leave size blank for "One size").');
   for(const x of rows){const sz=x.size||'One size';if(S.items.some(i=>!i.archived&&i.kind==s&&i.name==r.name&&i.size==sz))return alert(r.name+' · '+sz+' already exists. Close this and tap Edit on it instead.')}
-  for(const x of rows)await api({a:'save',t:'items',row:{name:r.name,remarks:r.remarks||'',kind:s,size:x.size||'One size',total:+x.qty||0,archived:0}});
+  for(const x of rows)await api({a:'save',t:'items',row:{name:r.name,category:r.category||'',remarks:r.remarks||'',kind:s,size:x.size||'One size',total:+x.qty||0,archived:0}});
   await load();toast('Saved ✓');closeM();if(again)openForm();return}
  if(t=='members')r.active??=1;else if(t=='items'){r.archived??=0;r.kind=s;r.size=r.size||'One size'}
+ if(t=='items'&&!isNew&&(row.category||'')!==(r.category||'')){for(const x of S.items.filter(i=>i.kind==row.kind&&i.name==row.name&&i.id!=row.id))await api({a:'save',t:'items',row:{...x,category:r.category||''}})}
  const res=await act({a:'save',t,row:r},'Saved ✓');
  if(t=='perfs'&&isNew&&res.id){U.perf=res.id;localStorage.perf=res.id;render()}
  closeM();if(again)openForm()}
@@ -158,7 +160,7 @@ v.rep=()=>`<div class=card><h3>Records</h3><div class=grid>
 `+`<div class=card><h3>Excel report</h3><p class=mut>Stock, items currently out, all performance records and members.</p><button class=btn onclick=xl()>Download Excel report</button></div>
 <div class=card><h3>Backup</h3><p class=mut>Download a backup regularly and keep it somewhere safe.</p><button class=btn onclick=bk()>Download full backup</button>
 <h3 style="margin-top:24px">Restore</h3><p class=mut>Replaces ALL current data with the backup file.</p><input type=file accept=.json onchange=rs(this)></div>`;
-async function xl(){if(!window.XLSX&&!await loadX())return alert('Could not load the Excel library. Check your connection.');const w=XLSX.utils.book_new(),add=(n,a)=>XLSX.utils.book_append_sheet(w,XLSX.utils.json_to_sheet(a),n),kn=i=>({Type:i.kind,Name:i.name,Size:i.size});
+async function xl(){if(!window.XLSX&&!await loadX())return alert('Could not load the Excel library. Check your connection.');const w=XLSX.utils.book_new(),add=(n,a)=>XLSX.utils.book_append_sheet(w,XLSX.utils.json_to_sheet(a),n),kn=i=>({Type:i.kind,Category:i.category||'',Name:i.name,Size:i.size});
  add('In store now',S.items.filter(i=>!i.archived).map(i=>({...kn(i),Total:i.total,Out:i.out,'In store':i.total-i.out})));
  const L=l=>({Performance:pf(l.perf_id).name,Member:mb(l.member_id).name,...kn(it(l.item_id)),Quantity:l.qty,'Check-out time':T(l.out_at),'Check-out remarks':l.out_note});
  add('Currently out',S.loans.filter(l=>!l.returned_at).map(L));

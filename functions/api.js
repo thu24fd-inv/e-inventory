@@ -1,8 +1,14 @@
-const C={members:'id,name,student_id,wechat,role,active',items:'id,kind,name,size,total,remarks,archived',perfs:'id,name,date',loans:'id,perf_id,member_id,item_id,qty,out_at,out_note,returned_at,cond,ret_note'};
+const C={members:'id,name,student_id,wechat,role,active',items:'id,kind,name,size,total,remarks,archived,category',perfs:'id,name,date',loans:'id,perf_id,member_id,item_id,qty,out_at,out_note,returned_at,cond,ret_note'};
 const ins=(db,t,r)=>{const c=C[t].split(',');return db.prepare(`INSERT OR REPLACE INTO ${t}(${C[t]}) VALUES(${c.map(()=>'?')})`).bind(...c.map(k=>r[k]??null))};
-export async function onRequest({request,env}){
+let migrated=0;
+async function main({request,env}){
   const J=(o,s=200)=>Response.json(o,{status:s,headers:{'cache-control':'no-store'}}),db=env.DB;
   if(!env.APP_PASSWORD||request.headers.get('x-pass')!==env.APP_PASSWORD)return J({},401);
+  if(!env.DB)return J({err:'Database not connected. In Cloudflare Pages > Settings > Bindings add a D1 binding named DB, then retry the deployment.'},500);
+  if(!migrated){try{const cols=(await db.prepare('PRAGMA table_info(items)').all()).results;
+    if(!cols.some(c=>c.name=='category')){await db.prepare('ALTER TABLE items ADD COLUMN category TEXT').run();
+      await db.prepare("UPDATE items SET category=CASE WHEN name LIKE '%有袖%' THEN 'Sleeved top' WHEN name LIKE '%无袖%' THEN 'Sleeveless top' WHEN name LIKE '%裙%' THEN 'Skirt' WHEN name LIKE '%彩带%' THEN 'Accessory' END WHERE kind='costume' AND category IS NULL").run()}
+    migrated=1}catch(e){}}
   if(request.method==='GET'){
     const q=async s=>(await db.prepare(s).all()).results;
     return J({members:await q('SELECT * FROM members ORDER BY name'),
@@ -33,3 +39,5 @@ export async function onRequest({request,env}){
   }else return J({},400);
   return J({ok:1,id:nid});
 }
+
+export async function onRequest(c){try{return await main(c)}catch(e){return new Response(JSON.stringify({err:'Server error: '+e.message}),{status:500,headers:{'content-type':'application/json','cache-control':'no-store'}})}}
