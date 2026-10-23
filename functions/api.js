@@ -21,11 +21,26 @@ async function main({request,env}){
       items:await q('SELECT i.*,coalesce((SELECT sum(qty) FROM loans l WHERE l.item_id=i.id AND l.returned_at IS NULL),0) AS out FROM items i ORDER BY kind,name,id'),
       perfs:full?perfs:perfs.map(({pin,...p})=>({...p,has_pin:pin?1:0})),loans:await q('SELECT * FROM loans ORDER BY id DESC')});
   }
-  const d=await request.json(),a=d.a,ok=['members','items','perfs'];let nid;
+  if(request.method!=='POST')return J({err:'Method not allowed.'},405);
+  let d;try{d=await request.json()}catch(e){return J({err:'Invalid JSON request.'},400)}
+  if(!d||typeof d!=='object'||Array.isArray(d))return J({err:'Invalid request body.'},400);
+  const a=d.a,ok=['members','items','perfs'];let nid;
   if(a=='save'){
     if(!ok.includes(d.t))return J({},400);
-    if(d.t=='perfs'){
-      if(d.row.id){const e=await db.prepare('SELECT pin FROM perfs WHERE id=?').bind(d.row.id).first();d.row.pin=e?e.pin:null}
+    if(!d.row||typeof d.row!=='object'||Array.isArray(d.row))return J({err:'Invalid record.'},400);
+    if(d.t==='items'){
+      const total=Number(d.row.total);
+      if(!Number.isSafeInteger(total)||total<0)return J({err:'Total quantity must be a whole number of zero or more.'},409);
+      if(d.row.id){
+        const current=await db.prepare('SELECT coalesce((SELECT sum(qty) FROM loans WHERE item_id=? AND returned_at IS NULL),0) AS out FROM items WHERE id=?').bind(d.row.id,d.row.id).first();
+        if(!current)return J({err:'Item not found.'},404);
+        if(total<current.out)return J({err:'Total quantity cannot be lower than the number of items currently checked out.'},409);
+      }
+    }
+    if(d.t==='members'&&!String(d.row.name||'').trim())return J({err:'Member name is required.'},409);
+    if(d.t==='perfs'){
+      if(!String(d.row.name||'').trim()||!/^\\d{4}-\\d{2}-\\d{2}$/.test(String(d.row.date||'')))return J({err:'A performance name and valid date are required.'},409);
+      if(d.row.id){const e=await db.prepare('SELECT pin FROM perfs WHERE id=?').bind(d.row.id).first();if(!e)return J({err:'Performance not found.'},404);d.row.pin=e.pin}
       else{if(!okPin(d.pin))return J({err:'Enter a PIN of 4 to 8 digits.'},409);d.row.pin=await hash(String(d.pin))}
     }
     nid=(await ins(db,d.t,d.row).run()).meta.last_row_id;
@@ -44,23 +59,39 @@ async function main({request,env}){
       return J({msg:'It has records, so it was archived / made inactive instead of deleted.'})}
     await db.prepare(`DELETE FROM ${d.t} WHERE id=?`).bind(d.id).run();
   }else if(a=='out'){
-    const r=await db.prepare(`INSERT INTO loans(perf_id,member_id,item_id,qty,out_at,out_note) SELECT ?,?,i.id,?,?,? FROM items i WHERE i.id=? AND ?>0 AND i.total-(SELECT coalesce(sum(qty),0) FROM loans WHERE item_id=i.id AND returned_at IS NULL)>=?`)
-      .bind(d.perf_id,d.member_id,d.qty,new Date().toISOString(),d.note||'',d.item_id,d.qty,d.qty).run();
-    if(!r.meta.changes)return J({err:'Not enough in store (someone may have just taken it).'},409);
+    const qty=Number(d.qty),perf=Number(d.perf_id),member=Number(d.member_id),item=Number(d.item_id);
+    if(!Number.isSafeInteger(qty)||qty<1||![perf,member,item].every(Number.isSafeInteger))return J({err:'Choose a valid performance, member, item and positive whole-number quantity.'},409);
+    const r=await db.prepare(`INSERT INTO loans(perf_id,member_id,item_id,qty,out_at,out_note)
+      SELECT p.id,m.id,i.id,?,?,? FROM perfs p JOIN members m ON m.id=? AND m.active=1
+      JOIN items i ON i.id=? AND i.archived=0
+      WHERE p.id=? AND i.total-(SELECT coalesce(sum(qty),0) FROM loans WHERE item_id=i.id AND returned_at IS NULL)>=?`)
+      .bind(qty,new Date().toISOString(),String(d.note||'').slice(0,1000),member,item,perf,qty).run();
+    if(!r.meta.changes)return J({err:'Checkout could not be recorded. Check that the performance, active member and item exist and enough stock is available.'},409);
   }else if(a=='ret'){
-    const ids=(d.rows||[]).map(r=>r.id);if(!ids.length)return J({},400);
-    const ls=(await db.prepare(`SELECT l.id,l.out_at,l.perf_id,p.name pn,p.pin FROM loans l JOIN perfs p ON p.id=l.perf_id WHERE l.returned_at IS NULL AND l.id IN (${ids.map(()=>'?')})`).bind(...ids).all()).results;
-    for(const pid of [...new Set(ls.map(l=>l.perf_id))]){const l=ls.find(x=>x.perf_id==pid);
-      if(l.pin&&await hash(String((d.pins||{})[pid]||''))!==l.pin)return J({err:'Wrong PIN for “'+l.pn+'”. Nothing was recorded. Only people who hold the PIN can approve returns.'},409)}
+    const rows=Array.isArray(d.rows)?d.rows:[];
+    const ids=rows.map(r=>Number(r&&r.id));
+    if(!rows.length||ids.some(id=>!Number.isSafeInteger(id)||id<1)||new Set(ids).size!==ids.length)return J({err:'Select valid, unique return records.'},400);
+    const ls=(await db.prepare(`SELECT l.id,l.out_at,l.perf_id,p.name pn,p.pin FROM loans l JOIN perfs p ON p.id=l.perf_id WHERE l.returned_at IS NULL AND l.id IN (${ids.map(()=>'?').join(',')})`).bind(...ids).all()).results;
+    if(ls.length!==ids.length)return J({err:'One or more records have already been returned or no longer exist. Refresh and try again.'},409);
+    for(const pid of [...new Set(ls.map(l=>l.perf_id))]){
+      const l=ls.find(x=>x.perf_id==pid);
+      if(l.pin&&await hash(String((d.pins||{})[pid]||''))!==l.pin)return J({err:'Wrong PIN for “'+l.pn+'”. Nothing was recorded. Only people who hold the PIN can approve returns.'},409);
+    }
     const at=d.at||new Date().toISOString();
-    if(ls.some(l=>at<l.out_at))return J({err:'The return time is earlier than the check-out time. Check the date.'},409);
-    await db.batch(d.rows.map(r=>db.prepare('UPDATE loans SET returned_at=?,cond=?,ret_note=? WHERE id=? AND returned_at IS NULL').bind(at,r.cond,r.note||'',r.id)));
+    if(typeof at!=='string'||isNaN(Date.parse(at))||ls.some(l=>at<l.out_at))return J({err:'The return time is invalid or earlier than the check-out time. Check the date.'},409);
+    const validConds=['OK','Needs cleaning','Damaged','Lost'];
+    if(rows.some(r=>!validConds.includes(r.cond||'OK')))return J({err:'Choose a valid return condition.'},409);
+    await db.batch(rows.map(r=>db.prepare('UPDATE loans SET returned_at=?,cond=?,ret_note=? WHERE id=? AND returned_at IS NULL').bind(at,r.cond||'OK',String(r.note||'').slice(0,1000),Number(r.id))));
   }else if(a=='delrec'){
     if(d.pin!==env.APP_PASSWORD)return J({err:'Wrong password. Nothing was deleted.'},409);
     await db.batch((d.ids||[]).map(id=>db.prepare('DELETE FROM loans WHERE id=?').bind(id)));
   }else if(a=='restore'){
-    await db.batch([...Object.keys(C).map(t=>db.prepare(`DELETE FROM ${t}`)),...Object.keys(C).flatMap(t=>(d.data[t]||[]).map(r=>ins(db,t,r)))]);
-  }else return J({},400);
+    if(!d.data||typeof d.data!=='object'||!['members','items','perfs','loans'].every(t=>Array.isArray(d.data[t])))return J({err:'Backup file is incomplete or invalid.'},400);
+    if(d.data.items.some(r=>!Number.isSafeInteger(Number(r.total))||Number(r.total)<0)||d.data.loans.some(r=>!Number.isSafeInteger(Number(r.qty))||Number(r.qty)<1))return J({err:'Backup contains invalid quantities. Nothing was restored.'},400);
+    try{
+      await db.batch([...Object.keys(C).map(t=>db.prepare(`DELETE FROM ${t}`)),...Object.keys(C).flatMap(t=>d.data[t].map(r=>ins(db,t,r)))]);
+    }catch(e){return J({err:'Backup could not be restored. The database was not changed if the transaction failed.'},409)}
+  }else return J({err:'Unknown action.'},400);
   return J({ok:1,id:nid});
 }
 export async function onRequest(c){try{return await main(c)}catch(e){return new Response(JSON.stringify({err:'Server error: '+e.message}),{status:500,headers:{'content-type':'application/json','cache-control':'no-store'}})}}

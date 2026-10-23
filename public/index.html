@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n<meta name="description" content="THU24FD inventory management for costumes, instruments, check-outs and returns.">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="THU24FD">
 <meta name="theme-color" content="#ffffff"><link rel="icon" href="logo.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>THU24FD e-inventory</title>
@@ -21,7 +21,13 @@ h3{margin:0 0 12px;font-size:18px}
 .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.span{grid-column:1/-1}
 label.f{display:block;font-size:14px;color:var(--mut);margin-bottom:4px}
 input,select{width:100%;min-width:0;height:48px;padding:0 12px;font:inherit;color:inherit;border:1px solid #cfc6d2;border-radius:10px;background:#fff}
-input:focus,select:focus{outline:2px solid var(--p);outline-offset:-1px}
+input:focus,select:focus,button:focus-visible{outline:3px solid color-mix(in srgb,var(--p) 35%,transparent);outline-offset:2px}
+button:disabled{opacity:.55;cursor:not-allowed}
+button:active:not(:disabled){transform:translateY(1px)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+.t th{white-space:nowrap}.t td{vertical-align:middle}.t input{max-width:100%}
+.card h3{line-height:1.3}#toast{max-width:calc(100vw - 32px);text-align:center}button,.chip{touch-action:manipulation}
+@media(max-width:480px){.stats{gap:7px}.tile{padding:10px 6px}.tile .n{font-size:24px}.tile .l{font-size:12px}.card{padding:13px}.btn{padding:0 14px}.ret{gap:8px}.sz{grid-template-columns:1fr 1fr 70px auto}}
 input[type=checkbox]{width:22px;height:22px;accent-color:var(--p)}
 .chk{display:flex;gap:10px;align-items:center;margin:12px 0 4px;font-size:15px;color:var(--mut)}
 .btn{height:48px;padding:0 20px;border-radius:10px;border:1px solid var(--p);background:var(--p);color:#fff;font:inherit;font-weight:600;white-space:nowrap;cursor:pointer}
@@ -153,9 +159,12 @@ return `<div class=card><div class=grid>
 ${cur.length?`<label class=chk><input type=checkbox onchange="document.querySelectorAll('.dsel').forEach(c=>c.checked=this.checked)">Select all</label>`:''}
 ${cur.map(l=>`<div class=li><input type=checkbox class=dsel value=${l.id}><div class=g><b>${esc(mb(l.member_id).name)}</b><div class=sub>${esc(lab(it(l.item_id)))} × ${l.qty}${l.out_note?' · '+esc(l.out_note):''}</div></div><span class="pill ${l.returned_at?'ok':''}">${l.returned_at?'Returned':'Out'}</span></div>`).join('')||'<p class=mut>Nothing recorded yet.</p>'}</div>`};
 function qty(d){U.qty=Math.max(1,(+$('#qty').value||1)+d);$('#qty').value=U.qty}
-async function give(){const mem=$('#mem').value,item=$('#item').value;
+async function give(){const mem=$('#mem').value,item=$('#item').value,btn=document.querySelector('#app button[onclick="give()"]');
  if(!U.perf)return alert('Create a performance first (tap + New).');if(!mem)return alert('Choose a member.');if(!item)return alert('Choose an item.');
- const r=await act({a:'out',perf_id:+U.perf,member_id:+mem,item_id:+item,qty:+$('#qty').value||1,note:U.note},'Recorded ✓');if(!r.err){U.qty=1;U.note='';render()}}
+ const quantity=Number($('#qty').value);if(!Number.isSafeInteger(quantity)||quantity<1)return alert('Quantity must be a whole number greater than zero.');
+ if(btn){if(btn.disabled)return;btn.disabled=true;btn.textContent='Saving…'}
+ try{const r=await act({a:'out',perf_id:+U.perf,member_id:+mem,item_id:+item,qty:quantity,note:U.note},'Recorded ✓');if(!r.err){U.qty=1;U.note='';render()}}
+ finally{if(btn&&btn.isConnected){btn.disabled=false;btn.textContent='Give out'}}}
 async function delSel(){const ids=[...document.querySelectorAll('.dsel:checked')].map(e=>+e.value);if(!ids.length)return alert('Tick the records to delete first.');
  if(!confirm('Delete '+ids.length+' record(s)? This cannot be undone.'))return;
  const pin=await askPin('Enter the site password to confirm deleting',0);if(pin==null)return;await act({a:'delrec',ids,pin},'Deleted')}
@@ -217,8 +226,10 @@ ${id?`<div class=row style="margin-top:16px;padding-top:16px;border-top:1px soli
  setTimeout(()=>{const e=$('#m_name');e&&(!id&&!(pre&&pre.name))&&e.focus()},60)}
 const closeM=()=>$('#modal').innerHTML='';
 async function saveForm(again){const {t,row,s}=U.edit,r={...row},isNew=!row.id;
- ['name','student_id','wechat','role','date','size','total','remarks','category','color'].forEach(k=>{const e=$('#m_'+k);if(e)r[k]=e.type=='number'?+e.value||0:e.value.trim()});
+ ['name','student_id','wechat','role','date','size','total','remarks','category','color'].forEach(k=>{const e=$('#m_'+k);if(e)r[k]=e.type=='number'?Number(e.value):e.value.trim()});
  if(!r.name)return alert('Name is required.');if(t=='perfs'&&!r.date)return alert('Date is required.');
+ if(t=='items'&&(!Number.isSafeInteger(r.total)||r.total<0))return alert('Total quantity must be a whole number of zero or more.');
+ if(t=='items'&&!isNew&&r.total<(Number(row.out)||0))return alert('Total quantity cannot be lower than the number of items currently checked out.');
  if(t=='perfs'){const pin=(($('#m_pin')||{}).value||'').trim(),old=(($('#m_oldpin')||{}).value||'').trim();
   if((isNew||pin)&&!/^\d{4,8}$/.test(pin))return alert('The PIN must be 4 to 8 digits.');
   const res=await act({a:'save',t,row:r,pin},'Saved ✓');if(res.err)return;
