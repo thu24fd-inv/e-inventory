@@ -1,8 +1,8 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Drum Stock">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="THU24FD">
 <meta name="theme-color" content="#ffffff"><link rel="icon" href="logo.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>Festive Drums Inventory</title>
+<title>THU24FD e-inventory</title>
 <style>
 :root{--p:#6b0973;--p2:#f4e9f5;--bg:#f6f4f7;--tx:#211b23;--mut:#7b707e;--ln:#e8e1ea;--ok:#1b7f4b;--bad:#b3261e}
 *{box-sizing:border-box}
@@ -34,12 +34,12 @@ table.t{width:100%;border-collapse:collapse}.t th{font-size:13px;color:var(--mut
 .seg{display:flex;gap:4px;background:#ece4ee;padding:4px;border-radius:12px;margin-bottom:16px;overflow-x:auto}
 .seg button{flex:1;height:42px;padding:0 14px;border:0;border-radius:9px;background:none;font:inherit;font-weight:600;color:var(--p);white-space:nowrap}
 .seg .on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15)}
-.grp{border-top:1px solid var(--ln);padding-top:12px;margin-top:8px}.grp:first-child{border:0;margin-top:0;padding-top:0}.sz{display:grid;grid-template-columns:1fr 90px auto;gap:8px}
+.grp{border-top:1px solid var(--ln);padding-top:12px;margin-top:8px}.grp:first-child{border:0;margin-top:0;padding-top:0}.sz{display:grid;grid-template-columns:1fr 1fr 80px auto;gap:8px}
 .li{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--ln)}.li:first-child{border-top:0}.li .g{flex:1;min-width:0}.off{opacity:.55}
 .sub,.mut{font-size:14px;color:var(--mut)}
 .pill{font-size:12px;padding:2px 8px;border-radius:99px;background:#eee;color:var(--mut);font-weight:600}.pill.ok{background:#dff3e8;color:var(--ok)}
 .qty{display:flex;gap:6px}.qty button{width:48px;height:48px;border-radius:10px;border:1px solid #cfc6d2;background:#fff;font-size:22px;color:var(--p)}.qty input{text-align:center}
-.ret{display:grid;grid-template-columns:1.2fr 150px 1fr auto;gap:10px;align-items:center;padding:12px 0;border-top:1px solid var(--ln);margin-top:8px}
+.ret{display:grid;grid-template-columns:auto 1.2fr 150px 1fr auto;gap:10px;align-items:center;padding:12px 0;border-top:1px solid var(--ln);margin-top:8px}
 @media(max-width:700px){.ret{grid-template-columns:1fr}.t1{font-size:16px}}
 .ov{position:fixed;inset:0;background:rgba(20,10,24,.45);display:flex;align-items:center;justify-content:center;z-index:30;padding:12px}
 .md{background:#fff;border-radius:16px;padding:20px;width:min(520px,100%);max-height:92vh;overflow:auto}.form{display:grid;gap:12px}
@@ -48,7 +48,7 @@ table.t{width:100%;border-collapse:collapse}.t th{font-size:13px;color:var(--mut
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.chip{height:38px;padding:0 16px;border-radius:99px;border:1px solid #cfc6d2;background:#fff;font:inherit;font-size:15px;color:var(--tx)}.chip.on{background:var(--p);border-color:var(--p);color:#fff}
 .fl{font-size:13px;color:var(--mut);margin:14px 0 0}.btn{box-shadow:0 1px 2px rgba(60,10,70,.15)}.btn.ghost{box-shadow:none}
 </style></head><body>
-<header><div class=top><img src="logo.png" alt=""><div><div class=t1>Festive Drums Inventory</div><div class=t2>二十四节令鼓社 · Tsinghua University</div></div><button class="btn ghost sm" style="margin-left:auto" onclick="load().then(()=>toast('Up to date ✓'))">↻ Refresh</button></div><nav id=nav></nav></header>
+<header><div class=top><img src="logo.png" alt=""><div><div class=t1>THU24FD e-inventory</div><div class=t2>二十四节令鼓社 · Tsinghua University</div></div><button class="btn ghost sm" style="margin-left:auto" onclick="load().then(()=>toast('Up to date ✓'))">↻ Refresh</button></div><nav id=nav></nav></header>
 <main id=app>Loading…</main><div id=modal></div><div id=toast></div>
 <script src="/xlsx.full.min.js"></script>
 <script>
@@ -56,7 +56,7 @@ let S={members:[],items:[],perfs:[],loans:[]},P=localStorage.pw||'',v={};
 let U={tab:'stock',sub:'members',q:'',arch:0,perf:localStorage.perf||'',mem:'',item:'',qty:1,note:'',f:'',fm:'',ft:'',fs:'',ot:'',oq:'',mr:'',fc:'',oc:'',sc:'',rp:'',rm:'',rs:'',edit:null};
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>'&#'+c.charCodeAt(0)+';'),T=s=>new Date(s).toLocaleString([], {dateStyle:'medium',timeStyle:'short'});
 const it=id=>S.items.find(i=>i.id==id)||{},mb=id=>S.members.find(m=>m.id==id)||{},pf=id=>S.perfs.find(p=>p.id==id)||{};
-const lab=i=>(i.name||'')+(i.size?' · '+i.size:''),today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const vl=i=>[i.color,i.size].filter(Boolean).join(' · '),lab=i=>(i.name||'')+(vl(i)?' · '+vl(i):''),nowL=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,16),today=()=>nowL().slice(0,10);
 const perfOpts=s=>S.perfs.map(p=>`<option value=${p.id} ${p.id==s?'selected':''}>${esc(p.name)} · ${p.date}</option>`).join('');
 function toast(m){const t=$('#toast');t.textContent=m;t.className='show';clearTimeout(toast.h);toast.h=setTimeout(()=>t.className='',2200)}
 async function api(b){let r;try{r=await fetch('/api',{method:b?'POST':'GET',cache:'no-store',headers:{'x-pass':P,'content-type':'application/json'},body:b&&JSON.stringify(b)})}catch(e){alert('No connection. Please try again.');throw e}
@@ -64,88 +64,118 @@ async function api(b){let r;try{r=await fetch('/api',{method:b?'POST':'GET',cach
  if(!r.ok&&r.status!=409){let m='Error '+r.status;try{m=(await r.json()).err||m}catch(e){}alert(m);throw 0}return r.json()}
 async function load(){S=await api();render()}
 async function poll(){const a=document.activeElement,busy=a&&a.closest('#app')&&/INPUT|SELECT/.test(a.tagName);
- if(document.hidden||busy||$('#modal').innerHTML||[...document.querySelectorAll('#app input[id^=n]')].some(e=>e.value))return;
+ if(document.hidden||busy||$('#modal').innerHTML||document.querySelector('.rsel:checked,.dsel:checked')||[...document.querySelectorAll('#app input[id^=n]')].some(e=>e.value))return;
  try{const r=await fetch('/api',{cache:'no-store',headers:{'x-pass':P}});if(!r.ok)return;const n=await r.json();if(JSON.stringify(n)!=JSON.stringify(S)){S=n;render()}}catch(e){}}
 setInterval(poll,10000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)poll()});
 async function act(b,msg){const r=await api(b);if(r.err||r.msg)alert(r.err||r.msg);else if(msg)toast(msg);await load();return r}
-const TABS={stock:'📦 Stock',out:'📤 Check out',ret:'📥 Returns',manage:'⚙️ Setup',rep:'📊 Reports'};
-function render(){if(!S.perfs.some(p=>p.id==U.perf))U.perf=S.perfs[0]?.id||'';
+const TABS={stock:'📦 Stock',out:'📤 Check out',ret:'📥 Returns',manage:'⚙️ Setup',other:'🥁 Others',rep:'📊 Reports'};
+function render(){if(U.tab=='other')U.sub='other';else if(U.sub=='other')U.sub='members';if(!S.perfs.some(p=>p.id==U.perf))U.perf=S.perfs[0]?.id||'';
  $('#nav').innerHTML=Object.entries(TABS).map(([k,l])=>`<button class="${k==U.tab?'on':''}" onclick="U.tab='${k}';U.q='';render();scrollTo(0,0)">${l}</button>`).join('');$('#app').innerHTML=v[U.tab]()}
 /* STOCK */
-const cats=()=>[...new Set(S.items.map(i=>i.category).filter(Boolean))].sort();
+const cats=m=>[...new Set(S.items.filter(i=>!m||(i.kind=='other')==(m=='o')).map(i=>i.category).filter(Boolean))].sort();
 const chip=(l,on,fn)=>`<button class="chip ${on?'on':''}" onclick="${fn}">${l}</button>`;
-const stockTables=()=>{const q=U.q.toLowerCase();return ['costume','shirt'].filter(k=>!U.ft||U.ft==k).map(k=>{const r=S.items.filter(i=>{const n=i.total-i.out;return !i.archived&&i.kind==k&&(!U.fc||i.category==U.fc)&&(i.name+i.size).toLowerCase().includes(q)&&(!U.fs||(U.fs=='in'?n>0:U.fs=='out'?i.out>0:n<=0))});
- return `<div class=card><h3>${k=='costume'?'Costumes':'Shirts'}</h3>`+(r.length?`<table class=t><tr><th>Name<th>Size<th class=r>Total<th class=r>Out<th class=r>In store</tr>`+r.map(i=>`<tr><td>${esc(i.name)}${i.category?`<div class=sub>${esc(i.category)}</div>`:''}<td>${esc(i.size)}<td class=r><input type=number min=0 value=${i.total} onchange="act({a:'save',t:'items',row:{...it(${i.id}),total:+this.value}},'Saved ✓')"><td class=r>${i.out}<td class="r ${i.total-i.out==0?'zero':''}"><b>${i.total-i.out}</b></tr>`).join('')+'</table>':'<p class=mut>No items match.</p>')+'</div>'}).join('')};
-v.stock=()=>{const t=S.items.filter(i=>!i.archived),sum=k=>t.reduce((a,i)=>a+i[k],0),tile=(l,n,c='')=>`<div class="tile ${c}"><div class=n>${n}</div><div class=l>${l}</div></div>`;
+const stockTables=()=>{const q=U.q.toLowerCase();return ['costume','shirt'].filter(k=>!U.ft||U.ft==k).map(k=>{const r=S.items.filter(i=>{const n=i.total-i.out;return !i.archived&&i.kind==k&&(!U.fc||i.category==U.fc)&&(i.name+vl(i)).toLowerCase().includes(q)&&(!U.fs||(U.fs=='in'?n>0:U.fs=='out'?i.out>0:n<=0))});
+ return `<div class=card><h3>${k=='costume'?'Costumes':'Shirts'}</h3>`+(r.length?`<table class=t><tr><th>Name<th>Variation<th class=r>Total<th class=r>Out<th class=r>In store</tr>`+r.map(i=>`<tr><td>${esc(i.name)}${i.category?`<div class=sub>${esc(i.category)}</div>`:''}<td>${esc(vl(i))}<td class=r><input type=number min=0 value=${i.total} onchange="act({a:'save',t:'items',row:{...it(${i.id}),total:+this.value}},'Saved ✓')"><td class=r>${i.out}<td class="r ${i.total-i.out==0?'zero':''}"><b>${i.total-i.out}</b></tr>`).join('')+'</table>':'<p class=mut>No items match.</p>')+'</div>'}).join('')};
+v.stock=()=>{const t=S.items.filter(i=>!i.archived&&i.kind!='other'),sum=k=>t.reduce((a,i)=>a+i[k],0),tile=(l,n,c='')=>`<div class="tile ${c}"><div class=n>${n}</div><div class=l>${l}</div></div>`;
  return `<div class=stats>${tile('Total pieces',sum('total'))}${tile('Out',sum('out'))}${tile('In store',sum('total')-sum('out'),'hl')}</div>
 <div class=card><input placeholder="🔍 Search items…" value="${esc(U.q)}" oninput="U.q=this.value;$('#lst').innerHTML=stockTables()">
 <div class=chips>${chip('All',!U.ft,"U.ft='';render()")}${chip('Costumes',U.ft=='costume',"U.ft='costume';render()")}${chip('Shirts',U.ft=='shirt',"U.ft='shirt';render()")}</div>
-<div class=chips>${chip('Any status',!U.fs,"U.fs='';render()")}${chip('In store',U.fs=='in',"U.fs='in';render()")}${chip('Out now',U.fs=='out',"U.fs='out';render()")}${chip('None left',U.fs=='none',"U.fs='none';render()")}</div>${cats().length?`<div class=chips>${chip('Any category',!U.fc,"U.fc='';render()")}${cats().map((c,i)=>chip(esc(c),U.fc==c,`U.fc=cats()[${i}];render()`)).join('')}</div>`:''}</div><div id=lst>${stockTables()}</div>`};
+<div class=chips>${chip('Any status',!U.fs,"U.fs='';render()")}${chip('In store',U.fs=='in',"U.fs='in';render()")}${chip('Out now',U.fs=='out',"U.fs='out';render()")}${chip('None left',U.fs=='none',"U.fs='none';render()")}</div>${cats('c').length?`<div class=chips>${chip('Any category',!U.fc,"U.fc='';render()")}${cats('c').map((c,i)=>chip(esc(c),U.fc==c,`U.fc=cats('c')[${i}];render()`)).join('')}</div>`:''}</div><div id=lst>${stockTables()}</div>`};
 /* CHECK OUT */
-const itemOpts=()=>{const q=(U.oq||'').toLowerCase(),av=S.items.filter(i=>!i.archived&&i.total-i.out>0&&(!U.ot||i.kind==U.ot)&&(!U.oc||i.category==U.oc)&&(i.name+i.size).toLowerCase().includes(q)),og=(k,l)=>{const r=av.filter(i=>i.kind==k);return r.length?`<optgroup label="${l}">${r.map(i=>`<option value=${i.id} ${U.item==i.id?'selected':''}>${esc(lab(i))} — ${i.total-i.out} left</option>`).join('')}</optgroup>`:''};return og('costume','Costumes')+og('shirt','Shirts')||'<option value="">No match</option>'};
+const itemOpts=()=>{const q=(U.oq||'').toLowerCase(),av=S.items.filter(i=>!i.archived&&i.total-i.out>0&&(!U.ot||i.kind==U.ot)&&(!U.oc||i.category==U.oc)&&(i.name+vl(i)).toLowerCase().includes(q)),og=(k,l)=>{const r=av.filter(i=>i.kind==k);return r.length?`<optgroup label="${l}">${r.map(i=>`<option value=${i.id} ${U.item==i.id?'selected':''}>${esc(lab(i))} — ${i.total-i.out} left</option>`).join('')}</optgroup>`:''};return og('costume','Costumes')+og('shirt','Shirts')+og('other','Other items')||'<option value="">No match</option>'};
 v.out=()=>{const cur=S.loans.filter(l=>l.perf_id==U.perf);
- return `<div class=card><div class=grid>
+return `<div class=card><div class=grid>
 <div><label class=f>Performance</label><div class=row style="flex-wrap:nowrap"><select onchange="U.perf=this.value;localStorage.perf=U.perf;render()">${S.perfs.length?perfOpts(U.perf):'<option value="">No performance yet</option>'}</select><button class="btn ghost" onclick="U.sub='perfs';openForm()">+ New</button></div></div>
 <div><label class=f>Member</label><select id=mem onchange="U.mem=this.value"><option value="">Choose member…</option>${S.members.filter(m=>m.active).map(m=>`<option value=${m.id} ${U.mem==m.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select></div>
-<div class=span><label class=f>Item</label><div class=row><input style="flex:1 1 170px" placeholder="🔍 Filter items…" value="${esc(U.oq)}" oninput="U.oq=this.value;$('#item').innerHTML=itemOpts()">${chip('All',!U.ot,"U.ot='';render()")}${chip('Costumes',U.ot=='costume',"U.ot='costume';render()")}${chip('Shirts',U.ot=='shirt',"U.ot='shirt';render()")}${cats().length?`<select style="width:auto;flex:none" onchange="U.oc=this.value;$('#item').innerHTML=itemOpts()"><option value="">All categories</option>${cats().map(c=>`<option ${U.oc==c?'selected':''}>${esc(c)}</option>`).join('')}</select>`:''}</div><select id=item style="margin-top:8px" onchange="U.item=this.value">${itemOpts()}</select></div>
+<div class=span><label class=f>Item</label><div class=row><input style="flex:1 1 170px" placeholder="🔍 Filter items…" value="${esc(U.oq)}" oninput="U.oq=this.value;$('#item').innerHTML=itemOpts()">${chip('All',!U.ot,"U.ot='';render()")}${chip('Costumes',U.ot=='costume',"U.ot='costume';render()")}${chip('Shirts',U.ot=='shirt',"U.ot='shirt';render()")}${chip('Other',U.ot=='other',"U.ot='other';render()")}${cats().length?`<select style="width:auto;flex:none" onchange="U.oc=this.value;$('#item').innerHTML=itemOpts()"><option value="">All categories</option>${cats().map(c=>`<option ${U.oc==c?'selected':''}>${esc(c)}</option>`).join('')}</select>`:''}</div><select id=item style="margin-top:8px" onchange="U.item=this.value">${itemOpts()}</select></div>
 <div><label class=f>Quantity</label><div class=qty><button onclick="qty(-1)">−</button><input id=qty type=number min=1 value=${U.qty} onchange="U.qty=+this.value||1"><button onclick="qty(1)">+</button></div></div>
 <div class=span><label class=f>Remarks (optional)</label><input placeholder="e.g. slightly loose, missing a button" value="${esc(U.note)}" oninput="U.note=this.value"></div></div>
 <button class="btn wide" style="margin-top:16px" onclick=give()>Give out</button></div>
-<div class=card><h3>Recorded for this performance</h3>${cur.map(l=>`<div class=li><div class=g><b>${esc(mb(l.member_id).name)}</b><div class=sub>${esc(lab(it(l.item_id)))} × ${l.qty}${l.out_note?' · '+esc(l.out_note):''}</div></div><span class="pill ${l.returned_at?'ok':''}">${l.returned_at?'Returned':'Out'}</span></div>`).join('')||'<p class=mut>Nothing recorded yet.</p>'}</div>`};
+<div class=card><div class=row style="justify-content:space-between"><h3 style="margin:0">Recorded for this performance</h3>${cur.length?'<button class="btn bad sm" onclick=delSel()>Delete selected</button>':''}</div>
+${cur.length?`<label class=chk><input type=checkbox onchange="document.querySelectorAll('.dsel').forEach(c=>c.checked=this.checked)">Select all</label>`:''}
+${cur.map(l=>`<div class=li><input type=checkbox class=dsel value=${l.id}><div class=g><b>${esc(mb(l.member_id).name)}</b><div class=sub>${esc(lab(it(l.item_id)))} × ${l.qty}${l.out_note?' · '+esc(l.out_note):''}</div></div><span class="pill ${l.returned_at?'ok':''}">${l.returned_at?'Returned':'Out'}</span></div>`).join('')||'<p class=mut>Nothing recorded yet.</p>'}</div>`};
 function qty(d){U.qty=Math.max(1,(+$('#qty').value||1)+d);$('#qty').value=U.qty}
 async function give(){const mem=$('#mem').value,item=$('#item').value;
  if(!U.perf)return alert('Create a performance first (tap + New).');if(!mem)return alert('Choose a member.');if(!item)return alert('Choose an item.');
  const r=await act({a:'out',perf_id:+U.perf,member_id:+mem,item_id:+item,qty:+$('#qty').value||1,note:U.note},'Recorded ✓');if(!r.err){U.qty=1;U.note='';render()}}
+async function delSel(){const ids=[...document.querySelectorAll('.dsel:checked')].map(e=>+e.value);if(!ids.length)return alert('Tick the records to delete first.');
+ if(!confirm('Delete '+ids.length+' record(s)? This cannot be undone.'))return;
+ const pin=await askPin('Enter the site password to confirm deleting',0);if(pin==null)return;await act({a:'delrec',ids,pin},'Deleted')}
+const askPin=(msg,num)=>new Promise(res=>{$('#modal').innerHTML=`<div class=ov><div class=md><h3>${esc(msg)}</h3><input id=pinin type=password ${num?'inputmode=numeric':''} autocomplete=off style="font-size:22px;text-align:center" onkeydown="if(event.key=='Enter')pinDone(1)"><div class=row style="margin-top:16px"><button class=btn onclick="pinDone(1)">OK</button><button class="btn ghost" onclick="pinDone(0)">Cancel</button></div></div></div>`;window.pinDone=ok=>{const x=ok?$('#pinin').value:null;closeM();res(x)};setTimeout(()=>$('#pinin').focus(),60)});
 /* RETURNS */
-v.ret=()=>{const f=U.f,g={};S.loans.filter(l=>!l.returned_at&&(!f||l.perf_id==f)&&(!U.fm||l.member_id==U.fm)).forEach(l=>(g[l.member_id+'-'+l.perf_id]??=[]).push(l));
- return `<div class=card><div class=grid><div><label class=f>Performance</label><select onchange="U.f=this.value;render()"><option value="">All performances</option>${perfOpts(f)}</select></div><div><label class=f>Member</label><select onchange="U.fm=this.value;render()"><option value="">All members</option>${S.members.map(m=>`<option value=${m.id} ${U.fm==m.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select></div></div></div>`+
- (Object.values(g).map(a=>`<div class=card><div class=row style="justify-content:space-between;flex-wrap:nowrap"><div><b>${esc(mb(a[0].member_id).name)}</b><div class=sub>${esc(pf(a[0].perf_id).name)} · ${pf(a[0].perf_id).date}</div></div><button class="btn ghost sm" onclick="ret([${a.map(l=>l.id)}])">Return all</button></div>`+
- a.map(l=>`<div class=ret><div><b>${esc(lab(it(l.item_id)))} × ${l.qty}</b><div class=sub>${T(l.out_at)}${l.out_note?' · '+esc(l.out_note):''}</div></div><select id=c${l.id}>${['OK','Needs cleaning','Damaged','Lost'].map(c=>`<option>${c}`).join('')}</select><input id=n${l.id} placeholder="Remarks (optional)"><button class="btn sm" onclick="ret([${l.id}])">Return</button></div>`).join('')+'</div>').join('')||'<div class=card><p class=mut>Nothing is out right now.</p></div>')};
-async function ret(ids){await act({a:'ret',rows:ids.map(id=>({id,cond:$('#c'+id).value,note:$('#n'+id).value}))},'Returned ✓')}
-/* MANAGE */
+/* RETURNS */
+v.ret=()=>{const f=U.f,g={},open=S.loans.filter(l=>!l.returned_at&&(!f||l.perf_id==f)&&(!U.fm||l.member_id==U.fm));open.forEach(l=>(g[l.member_id+'-'+l.perf_id]??=[]).push(l));
+return `<div class=card><div class=grid><div><label class=f>Performance</label><select onchange="U.f=this.value;render()"><option value="">All performances</option>${perfOpts(f)}</select></div>
+<div><label class=f>Member</label><select onchange="U.fm=this.value;render()"><option value="">All members</option>${S.members.map(m=>`<option value=${m.id} ${U.fm==m.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select></div>
+<div><label class=f>Return date &amp; time (default: now)</label><input id=rdt type=datetime-local value="${nowL()}" onchange="this.dataset.t=1"></div></div></div>`+
+(open.length?`<div class=card><div class=row style="justify-content:space-between"><label class=chk style="margin:0"><input type=checkbox onchange="selAll(this.checked)">Select all (${open.length})</label><button class=btn id=selbtn onclick=retSel()>Return selected (0)</button></div></div>`:'')+
+(Object.values(g).map(a=>`<div class=card><div class=row style="justify-content:space-between;flex-wrap:nowrap"><div><b>${esc(mb(a[0].member_id).name)}</b><div class=sub>${esc(pf(a[0].perf_id).name)} · ${pf(a[0].perf_id).date}${pf(a[0].perf_id).has_pin?' · 🔒 PIN':''}</div></div><button class="btn ghost sm" onclick="ret([${a.map(l=>l.id)}])">Return all</button></div>`+
+a.map(l=>`<div class=ret><input type=checkbox class=rsel value=${l.id} onchange=selCount()><div><b>${esc(lab(it(l.item_id)))} × ${l.qty}</b><div class=sub>${T(l.out_at)}${l.out_note?' · '+esc(l.out_note):''}</div></div><select id=c${l.id}>${['OK','Needs cleaning','Damaged','Lost'].map(c=>`<option>${c}`).join('')}</select><input id=n${l.id} placeholder="Remarks (optional)"><button class="btn sm" onclick="ret([${l.id}])">Return</button></div>`).join('')+'</div>').join('')||'<div class=card><p class=mut>Nothing is out right now.</p></div>')};
+const selCount=()=>{const b=$('#selbtn');if(b)b.textContent='Return selected ('+document.querySelectorAll('.rsel:checked').length+')'};
+const selAll=c=>{document.querySelectorAll('.rsel').forEach(e=>e.checked=c);selCount()};
+const retSel=()=>{const ids=[...document.querySelectorAll('.rsel:checked')].map(e=>+e.value);ids.length?ret(ids):alert('Tick the items to return first.')};
+async function ret(ids){const ls=ids.map(id=>S.loans.find(l=>l.id==id)).filter(Boolean),pins={};
+ for(const pid of [...new Set(ls.map(l=>l.perf_id))]){const p=pf(pid);if(p.has_pin){const x=await askPin('Enter the PIN for “'+p.name+'” to approve the return',1);if(x==null)return;pins[pid]=x}}
+ const t=$('#rdt');let at;if(t&&t.dataset.t&&t.value){const dd=new Date(t.value);if(isNaN(dd))return alert('Check the return date.');at=dd.toISOString()}
+ await act({a:'ret',pins,at,rows:ids.map(id=>({id,cond:$('#c'+id).value,note:$('#n'+id).value}))},'Returned ✓')}
 const KINDS={members:'Members',costume:'Costumes',shirt:'Shirts',perfs:'Performances'};
 v.manage=()=>`<div class=seg>${Object.entries(KINDS).map(([k,l])=>`<button class="${U.sub==k?'on':''}" onclick="U.sub='${k}';U.q='';U.sc='';U.mr='';render()">${l}</button>`).join('')}</div>
 <div class=card><div class=row style="flex-wrap:nowrap"><input placeholder="Search…" value="${esc(U.q)}" oninput="U.q=this.value;$('#lst').innerHTML=mlist()"><button class=btn onclick="openForm()">+ Add</button></div>
-${U.sub=='members'?`<select style="margin-top:10px" onchange="U.mr=this.value;$('#lst').innerHTML=mlist()"><option value="">All roles</option>${[...new Set(S.members.map(m=>m.role).filter(Boolean))].map(r=>`<option ${U.mr==r?'selected':''}>${esc(r)}</option>`).join('')}</select>`:''}${(U.sub=='costume'||U.sub=='shirt')&&cats().length?`<select style="margin-top:10px" onchange="U.sc=this.value;$('#lst').innerHTML=mlist()"><option value="">All categories</option>${cats().map(c=>`<option ${U.sc==c?'selected':''}>${esc(c)}</option>`).join('')}</select>`:''}${U.sub=='perfs'?'':`<label class=chk><input type=checkbox ${U.arch?'checked':''} onchange="U.arch=this.checked?1:0;$('#lst').innerHTML=mlist()">Show ${U.sub=='members'?'inactive':'archived'}</label>`}
+${U.sub=='members'?`<select style="margin-top:10px" onchange="U.mr=this.value;$('#lst').innerHTML=mlist()"><option value="">All roles</option>${[...new Set(S.members.map(m=>m.role).filter(Boolean))].map(r=>`<option ${U.mr==r?'selected':''}>${esc(r)}</option>`).join('')}</select>`:''}${(U.sub=='costume'||U.sub=='shirt')&&cats('c').length?`<select style="margin-top:10px" onchange="U.sc=this.value;$('#lst').innerHTML=mlist()"><option value="">All categories</option>${cats('c').map(c=>`<option ${U.sc==c?'selected':''}>${esc(c)}</option>`).join('')}</select>`:''}${U.sub=='perfs'?'':`<label class=chk><input type=checkbox ${U.arch?'checked':''} onchange="U.arch=this.checked?1:0;$('#lst').innerHTML=mlist()">Show ${U.sub=='members'?'inactive':'archived'}</label>`}
 <div id=lst style="margin-top:8px">${mlist()}</div></div>`;
 function mlist(){const q=U.q.toLowerCase(),s=U.sub;let r;
  if(s=='members')r=S.members.filter(m=>(U.arch||m.active)&&(!U.mr||m.role==U.mr)&&(m.name+(m.role||'')+(m.student_id||'')).toLowerCase().includes(q));
  else if(s=='perfs')r=S.perfs.filter(p=>(p.name+p.date).toLowerCase().includes(q));
- else r=S.items.filter(i=>i.kind==s&&(U.arch||!i.archived)&&(!U.sc||i.category==U.sc)&&(i.name+i.size).toLowerCase().includes(q));
+ else r=S.items.filter(i=>i.kind==s&&(U.arch||!i.archived)&&(!U.sc||i.category==U.sc)&&(i.name+vl(i)).toLowerCase().includes(q));
  const none='<p class=mut>Nothing yet. Tap “+ Add”.</p>';
  if(s=='costume'||s=='shirt'){const g={};r.forEach(i=>(g[i.name]??=[]).push(i));
-  return Object.values(g).map(a=>`<div class=grp><div class=row style="justify-content:space-between;flex-wrap:nowrap"><div><b>${esc(a[0].name)}</b>${a[0].category?` <span class=pill>${esc(a[0].category)}</span>`:''}</div><button class="btn ghost sm" onclick="openGrp(${a[0].id})">+ Size</button></div>`+a.map(x=>`<div class="li ${x.archived?'off':''}"><div class=g>${esc(x.size)} ${x.archived?'<span class=pill>Archived</span>':''}${x.remarks?`<div class=sub>${esc(x.remarks)}</div>`:''}</div><b>× ${x.total}</b><button class="btn ghost sm" onclick="openForm(${x.id})">Edit</button></div>`).join('')+'</div>').join('')||none}
- return r.map(x=>{const off=s=='members'?!x.active:0,sub=s=='members'?[x.role,x.student_id,x.wechat].filter(Boolean).join(' · '):x.date+' · '+S.loans.filter(l=>l.perf_id==x.id).length+' records';
+  return Object.values(g).map(a=>`<div class=grp><div class=row style="justify-content:space-between;flex-wrap:nowrap"><div><b>${esc(a[0].name)}</b>${a[0].category?` <span class=pill>${esc(a[0].category)}</span>`:''}</div><button class="btn ghost sm" onclick="openGrp(${a[0].id})">+ Variation</button></div>`+a.map(x=>`<div class="li ${x.archived?'off':''}"><div class=g>${esc(vl(x))} ${x.archived?'<span class=pill>Archived</span>':''}${x.remarks?`<div class=sub>${esc(x.remarks)}</div>`:''}</div><b>× ${x.total}</b><button class="btn ghost sm" onclick="openForm(${x.id})">Edit</button></div>`).join('')+'</div>').join('')||none}
+ return r.map(x=>{const off=s=='members'?!x.active:0,sub=s=='members'?[x.role,x.student_id,x.wechat].filter(Boolean).join(' · '):x.date+' · '+S.loans.filter(l=>l.perf_id==x.id).length+' records · '+(x.has_pin?'🔒 PIN set':'⚠️ no PIN');
   return `<div class="li ${off?'off':''}"><div class=g><b>${esc(x.name)}</b> ${off?'<span class=pill>Inactive</span>':''}<div class=sub>${esc(sub)}</div></div><button class="btn ghost sm" onclick="openForm(${x.id})">Edit</button></div>`}).join('')||none}
+/* OTHER ITEMS (instruments, drums, souvenirs…) */
+const olist=()=>{const q=U.q.toLowerCase(),g={};S.items.filter(i=>i.kind=='other'&&(U.arch||!i.archived)&&(!U.sc||i.category==U.sc)&&(i.name+vl(i)+(i.category||'')).toLowerCase().includes(q)).forEach(i=>(g[i.category||'Uncategorised']??=[]).push(i));
+ return Object.entries(g).map(([c,a])=>`<div class=grp><div class=row style="justify-content:space-between;flex-wrap:nowrap"><b>${esc(c)}</b><button class="btn ghost sm" onclick="openCat(${a[0].id})">+ Add here</button></div>`+a.map(x=>`<div class="li ${x.archived?'off':''}"><div class=g><b>${esc(x.name)}</b> ${esc(vl(x))} ${x.archived?'<span class=pill>Archived</span>':''}<div class=sub>${x.out} out · ${x.total-x.out} in store${x.remarks?' · '+esc(x.remarks):''}</div></div><input type=number min=0 style="width:76px;height:40px;text-align:center" value=${x.total} onchange="act({a:'save',t:'items',row:{...it(${x.id}),total:+this.value}},'Saved ✓')"><button class="btn ghost sm" onclick="openForm(${x.id})">Edit</button></div>`).join('')+'</div>').join('')||'<p class=mut>Nothing here yet. Tap “+ Add” to start, for example drums, sticks or souvenirs.</p>'};
+v.other=()=>{const t=S.items.filter(i=>!i.archived&&i.kind=='other'),sum=k=>t.reduce((a,i)=>a+i[k],0),tl=(l,n,c='')=>`<div class="tile ${c}"><div class=n>${n}</div><div class=l>${l}</div></div>`;
+ return `<div class=stats>${tl('Total pieces',sum('total'))}${tl('Out',sum('out'))}${tl('In store',sum('total')-sum('out'),'hl')}</div>
+<div class=card><div class=row style="flex-wrap:nowrap"><input placeholder="🔍 Search instruments, drums, souvenirs…" value="${esc(U.q)}" oninput="U.q=this.value;$('#lst').innerHTML=olist()"><button class=btn onclick="openForm()">+ Add</button></div>
+${cats('o').length?`<select style="margin-top:10px" onchange="U.sc=this.value;$('#lst').innerHTML=olist()"><option value="">All categories</option>${cats('o').map(c=>`<option ${U.sc==c?'selected':''}>${esc(c)}</option>`).join('')}</select>`:''}
+<label class=chk><input type=checkbox ${U.arch?'checked':''} onchange="U.arch=this.checked?1:0;$('#lst').innerHTML=olist()">Show archived</label><div id=lst style="margin-top:8px">${olist()}</div></div>`};
+const openCat=id=>openForm(0,{category:it(id).category||''});
 const openGrp=id=>{const i=it(id);openForm(0,{name:i.name,remarks:i.remarks||'',category:i.category||''})};
-const sizeRow=()=>'<div class=sz><input placeholder="Size (M, L… blank = One size)"><input type=number min=0 placeholder="Qty"><button class="btn ghost sm" onclick="this.parentNode.remove()">✕</button></div>';
+const sizeRow=()=>'<div class=sz><input placeholder="Size"><input placeholder="Colour"><input type=number min=0 placeholder="Qty"><button class="btn ghost sm" onclick="this.parentNode.remove()">✕</button></div>';
 const addSize=()=>{$('#szs').insertAdjacentHTML('beforeend',sizeRow())};
 function openForm(id,pre){const s=U.sub,t=s=='members'?'members':s=='perfs'?'perfs':'items',row=id?{...(t=='members'?mb(id):t=='perfs'?pf(id):it(id))}:(s=='perfs'?{date:today()}:pre||{});U.edit={t,row,s};
  const fd=(k,l,ty='text',x='')=>`<div><label class=f>${l}</label><input id=m_${k} type=${ty} value="${esc(row[k])}" ${x}></div>`;
- const nm=s=='shirt'?'Name / design *':'Name *',cf=fd('category','Category','text','list=cats placeholder="e.g. Top, Under layer, Skirt, Accessory"')+`<datalist id=cats>${cats().map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
+ const pinf=(l,i,ph='')=>`<div><label class=f>${l}</label><input id=${i} type=password inputmode=numeric autocomplete=new-password placeholder="${ph}"></div>`;
+ const nm=s=='shirt'?'Name / design *':s=='other'?'Item name *':'Name *',cf=fd('category','Category','text','list=cats placeholder="e.g. Top, Under layer, Skirt, Accessory"')+`<datalist id=cats>${cats(s=='other'?'o':'c').map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
  const fl=t=='members'?fd('name','Name *')+fd('student_id','Student ID 学号')+fd('wechat','WeChat')+fd('role','Role','text','list=roles placeholder="drummer, committee…"')+'<datalist id=roles><option>drummer<option>committee</datalist>'
-  :t=='perfs'?fd('name','Performance name *')+fd('date','Date','date')
-  :id?fd('name',nm)+cf+fd('size','Size (blank = One size)')+fd('total','Total quantity','number','min=0')+fd('remarks','Remarks')
-  :fd('name',nm)+cf+fd('remarks','Remarks (optional)')+`<div><label class=f>Sizes and quantities</label><div id=szs class=form>${sizeRow()}</div><button class="btn ghost sm" style="margin-top:10px" onclick=addSize()>+ Add another size</button></div>`;
- const off=t=='members'?!row.active:row.archived,label={members:'member',perfs:'performance',costume:'costume',shirt:'shirt'}[s];
+  :t=='perfs'?fd('name','Performance name *')+fd('date','Date','date')+(id?(row.has_pin?pinf('Current PIN (only needed to change it)','m_oldpin')+pinf('New PIN, 4–8 digits (leave blank to keep)','m_pin'):pinf('Set a return PIN (4–8 digits)','m_pin','Not set yet')):pinf('Return PIN * (4–8 digits)','m_pin','Needed to approve returns'))
+  :id?fd('name',nm)+cf+fd('color','Colour (optional)')+fd('size','Size (blank = One size)')+fd('total','Total quantity','number','min=0')+fd('remarks','Remarks')
+  :fd('name',nm)+cf+fd('remarks','Remarks (optional)')+`<div><label class=f>Variations and quantities (size and/or colour; leave size blank for One size)</label><div id=szs class=form>${sizeRow()}</div><button class="btn ghost sm" style="margin-top:10px" onclick=addSize()>+ Add another variation</button></div>`;
+ const off=t=='members'?!row.active:row.archived,label={members:'member',perfs:'performance',costume:'costume',shirt:'shirt',other:'item'}[s];
  $('#modal').innerHTML=`<div class=ov onclick="if(event.target==this)closeM()"><div class=md><h3>${id?'Edit':'Add'} ${label}</h3><div class=form>${fl}</div>
 <div class=row style="margin-top:20px"><button class=btn onclick="saveForm(0)">Save</button>${id?'':'<button class="btn ghost" onclick="saveForm(1)">Save &amp; add another</button>'}<button class="btn ghost" onclick=closeM()>Cancel</button></div>
 ${id?`<div class=row style="margin-top:16px;padding-top:16px;border-top:1px solid var(--ln)">${t=='perfs'?'':`<button class="btn ghost sm" onclick=flip()>${off?'Restore':t=='members'?'Make inactive':'Archive'}</button>`}<button class="btn bad sm" onclick=delRow()>Delete</button></div>`:''}</div></div>`;
  setTimeout(()=>{const e=$('#m_name');e&&(!id&&!(pre&&pre.name))&&e.focus()},60)}
 const closeM=()=>$('#modal').innerHTML='';
 async function saveForm(again){const {t,row,s}=U.edit,r={...row},isNew=!row.id;
- ['name','student_id','wechat','role','date','size','total','remarks','category'].forEach(k=>{const e=$('#m_'+k);if(e)r[k]=e.type=='number'?+e.value||0:e.value.trim()});
+ ['name','student_id','wechat','role','date','size','total','remarks','category','color'].forEach(k=>{const e=$('#m_'+k);if(e)r[k]=e.type=='number'?+e.value||0:e.value.trim()});
  if(!r.name)return alert('Name is required.');if(t=='perfs'&&!r.date)return alert('Date is required.');
+ if(t=='perfs'){const pin=(($('#m_pin')||{}).value||'').trim(),old=(($('#m_oldpin')||{}).value||'').trim();
+  if((isNew||pin)&&!/^\d{4,8}$/.test(pin))return alert('The PIN must be 4 to 8 digits.');
+  const res=await act({a:'save',t,row:r,pin},'Saved ✓');if(res.err)return;
+  if(isNew&&res.id){U.perf=res.id;localStorage.perf=res.id}
+  if(!isNew&&pin){const x=await act({a:'perf_pin',id:row.id,old,new:pin},'PIN changed ✓');if(x.err)return}
+  render();closeM();if(again)openForm();return}
  if(t=='items'&&isNew){
-  const rows=[...document.querySelectorAll('#szs .sz')].map(d=>{const i=d.querySelectorAll('input');return{size:i[0].value.trim(),qty:i[1].value}}).filter(x=>x.size||x.qty!=='');
-  if(!rows.length)return alert('Enter at least one size with a quantity (leave size blank for "One size").');
-  for(const x of rows){const sz=x.size||'One size';if(S.items.some(i=>!i.archived&&i.kind==s&&i.name==r.name&&i.size==sz))return alert(r.name+' · '+sz+' already exists. Close this and tap Edit on it instead.')}
-  for(const x of rows)await api({a:'save',t:'items',row:{name:r.name,category:r.category||'',remarks:r.remarks||'',kind:s,size:x.size||'One size',total:+x.qty||0,archived:0}});
+  const rows=[...document.querySelectorAll('#szs .sz')].map(d=>{const i=d.querySelectorAll('input');return{size:i[0].value.trim(),color:i[1].value.trim(),qty:i[2].value}}).filter(x=>x.size||x.color||x.qty!=='');
+  if(!rows.length)return alert('Enter at least one variation with a quantity (leave size blank for "One size").');
+  for(const x of rows){const sz=x.size||'One size';if(S.items.some(i=>!i.archived&&i.kind==s&&i.name==r.name&&i.size==sz&&(i.color||'')==x.color))return alert(r.name+' · '+[x.color,sz].filter(Boolean).join(' · ')+' already exists. Close this and tap Edit on it instead.')}
+  for(const x of rows)await api({a:'save',t:'items',row:{name:r.name,category:r.category||'',remarks:r.remarks||'',kind:s,size:x.size||'One size',color:x.color,total:+x.qty||0,archived:0}});
   await load();toast('Saved ✓');closeM();if(again)openForm();return}
- if(t=='members')r.active??=1;else if(t=='items'){r.archived??=0;r.kind=s;r.size=r.size||'One size'}
+ if(t=='members')r.active??=1;else if(t=='items'){r.archived??=0;r.kind=row.kind||s;r.size=r.size||'One size'}
  if(t=='items'&&!isNew&&(row.category||'')!==(r.category||'')){for(const x of S.items.filter(i=>i.kind==row.kind&&i.name==row.name&&i.id!=row.id))await api({a:'save',t:'items',row:{...x,category:r.category||''}})}
- const res=await act({a:'save',t,row:r},'Saved ✓');
- if(t=='perfs'&&isNew&&res.id){U.perf=res.id;localStorage.perf=res.id;render()}
+ await act({a:'save',t,row:r},'Saved ✓');
  closeM();if(again)openForm()}
 async function flip(){const {t,row}=U.edit,r={...row};t=='members'?r.active=r.active?0:1:r.archived=r.archived?0:1;closeM();await act({a:'save',t,row:r},'Updated ✓')}
 async function delRow(){const {t,row}=U.edit;if(!confirm('Delete “'+row.name+'”? If it has records, it will be archived instead.'))return;closeM();await act({a:'del',t,id:row.id})}
@@ -160,14 +190,14 @@ v.rep=()=>`<div class=card><h3>Records</h3><div class=grid>
 `+`<div class=card><h3>Excel report</h3><p class=mut>Stock, items currently out, all performance records and members.</p><button class=btn onclick=xl()>Download Excel report</button></div>
 <div class=card><h3>Backup</h3><p class=mut>Download a backup regularly and keep it somewhere safe.</p><button class=btn onclick=bk()>Download full backup</button>
 <h3 style="margin-top:24px">Restore</h3><p class=mut>Replaces ALL current data with the backup file.</p><input type=file accept=.json onchange=rs(this)></div>`;
-async function xl(){if(!window.XLSX&&!await loadX())return alert('Could not load the Excel library. Check your connection.');const w=XLSX.utils.book_new(),add=(n,a)=>XLSX.utils.book_append_sheet(w,XLSX.utils.json_to_sheet(a),n),kn=i=>({Type:i.kind,Category:i.category||'',Name:i.name,Size:i.size});
+async function xl(){if(!window.XLSX&&!await loadX())return alert('Could not load the Excel library. Check your connection.');const w=XLSX.utils.book_new(),add=(n,a)=>XLSX.utils.book_append_sheet(w,XLSX.utils.json_to_sheet(a),n),kn=i=>({Type:i.kind,Category:i.category||'',Name:i.name,Colour:i.color||'',Size:i.size});
  add('In store now',S.items.filter(i=>!i.archived).map(i=>({...kn(i),Total:i.total,Out:i.out,'In store':i.total-i.out})));
  const L=l=>({Performance:pf(l.perf_id).name,Member:mb(l.member_id).name,...kn(it(l.item_id)),Quantity:l.qty,'Check-out time':T(l.out_at),'Check-out remarks':l.out_note});
  add('Currently out',S.loans.filter(l=>!l.returned_at).map(L));
  add('Performance records',S.loans.map(l=>({...L(l),'Return time':l.returned_at?T(l.returned_at):'','Return condition':l.cond||'','Return remarks':l.ret_note||'',Status:l.returned_at?'Returned':'Out'})));
  add('Members',S.members.map(m=>({Name:m.name,Role:m.role,Status:m.active?'Active':'Inactive'})));
  XLSX.writeFile(w,`inventory-${today()}.xlsx`)}
-function bk(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download=`backup-${today()}.json`;a.click()}
+async function bk(){const r=await fetch('/api?backup=1',{cache:'no-store',headers:{'x-pass':P}});if(!r.ok)return alert('Could not make the backup. Try again.');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([await r.text()],{type:'application/json'}));a.download=`backup-${today()}.json`;a.click()}
 async function rs(el){const f=el.files[0];if(f&&confirm('This REPLACES all current data with the backup. Continue?'))await act({a:'restore',data:JSON.parse(await f.text())},'Restored ✓')}
 load();
 </script></body></html>

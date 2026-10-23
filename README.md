@@ -46,3 +46,9 @@ Reports > Download full backup. Do it monthly. Keep copies in 2 places.
 
 ## HAND OVER
 Give the next committee the club email login. Keep recovery phone numbers / backup emails of 2+ people on the accounts. Change APP_PASSWORD (step 5) when members leave.
+
+## VERSION NOTES (latest)
+- Title: THU24FD e-inventory. New tab "Others" for instruments, drums, souvenirs (starts empty; clothes data is separate).
+- Items have Category, Size and Colour. Each performance has a return PIN (set when adding it). Returns need that PIN; deleting check-out records needs the site password.
+- The database upgrades itself the first time the new version runs. No SQL needed.
+- Old performances have no PIN: open Setup > Performances > Edit to set one.
