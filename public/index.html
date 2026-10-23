@@ -57,18 +57,62 @@ body[data-sec=other]{--p:#0b6b7a;--p2:#e0f2f4}
 body[data-sec=other] .top{background:linear-gradient(120deg,#07424d,#1a8797)}
 body[data-sec=other] .tile.hl{background:linear-gradient(135deg,#0b6b7a,#1a8797)}
 body[data-sec=other] .secbar{background:#f1f8f9}
+
+.top{padding:12px 20px}
+.shell{display:flex;gap:20px;max-width:1120px;margin:auto;padding:18px 16px 60px;align-items:flex-start}
+aside{width:184px;flex:none;position:sticky;top:88px}
+nav{display:flex;flex-direction:column;gap:4px;padding:0;background:none;border:0;overflow:visible}
+nav button{flex:none;width:100%;height:48px;text-align:left;padding:0 14px;border-radius:12px;font-size:16px}
+.secbar{display:flex;gap:2px;padding:2px;margin:22px 0 0;background:#ece6ee;border-radius:8px;border:0;width:fit-content}
+.secbar button{flex:none;height:26px;padding:0 10px;border:0;border-radius:6px;background:none;font:inherit;font-size:12px;font-weight:600;color:#9a8f9d}
+.secbar .on{background:#fff;color:var(--p);box-shadow:0 1px 2px rgba(0,0,0,.14)}
+body[data-sec=other] .secbar{background:#e1ecee}
+main{flex:1;min-width:0;max-width:none;margin:0;padding:0}
+@media(max-width:700px){.shell{flex-direction:column;gap:10px;padding:10px 12px 50px}aside{width:100%;position:static}nav{flex-direction:row;overflow-x:auto}nav button{width:auto;flex:none;white-space:nowrap;height:42px}.secbar{margin-top:8px}}
 </style></head><body>
-<header><div class=top><img src="logo.png" alt=""><div><div class=t1>THU24FD e-inventory</div><div class=t2>二十四节令鼓社 · Tsinghua University</div></div><button class="btn ghost sm" style="margin-left:auto" onclick="load().then(()=>toast('Up to date ✓'))">↻ Refresh</button></div><div class=secbar id=secbar></div><nav id=nav></nav></header>
-<main id=app>Loading…</main><div id=modal></div><div id=toast></div>
+<header><div class=top><img src="logo.png" alt=""><div><div class=t1>THU24FD e-inventory</div><div class=t2>二十四节令鼓社 · Tsinghua University</div></div><button class="btn ghost sm" id=langbtn style="margin-left:auto" onclick="setLang()">中文</button><button class="btn ghost sm" onclick="load().then(()=>toast('Up to date ✓'))">↻ Refresh</button></div></header>
+<div class=shell><aside><nav id=nav></nav><div class=secbar id=secbar></div></aside><main id=app>Loading…</main></div><div id=modal></div><div id=toast></div>
 <script src="/xlsx.full.min.js"></script>
 <script>
 let S={members:[],items:[],perfs:[],loans:[]},P=localStorage.pw||'',v={};
 let U={tab:'stock',sub:'members',q:'',arch:0,perf:localStorage.perf||'',mem:'',item:'',qty:1,note:'',f:'',fm:'',ft:'',fs:'',ot:'',oq:'',mr:'',fc:'',oc:'',sc:'',rp:'',rm:'',rs:'',sec:localStorage.sec||'clothes',edit:null};
-const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>'&#'+c.charCodeAt(0)+';'),T=s=>new Date(s).toLocaleString([], {dateStyle:'medium',timeStyle:'short'});
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>'&#'+c.charCodeAt(0)+';'),T=s=>new Date(s).toLocaleString(L=='zh'?'zh-CN':[], {dateStyle:'medium',timeStyle:'short'});
 const it=id=>S.items.find(i=>i.id==id)||{},mb=id=>S.members.find(m=>m.id==id)||{},pf=id=>S.perfs.find(p=>p.id==id)||{};
 const vl=i=>[i.color,i.size].filter(Boolean).join(' · '),lab=i=>(i.name||'')+(vl(i)?' · '+vl(i):''),nowL=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,16),today=()=>nowL().slice(0,10);
 const perfOpts=s=>S.perfs.map(p=>`<option value=${p.id} ${p.id==s?'selected':''}>${esc(p.name)} · ${p.date}</option>`).join('');
-function toast(m){const t=$('#toast');t.textContent=m;t.className='show';clearTimeout(toast.h);toast.h=setTimeout(()=>t.className='',2200)}
+function toast(m){const t=$('#toast');t.textContent=trz(m);t.className='show';clearTimeout(toast.h);toast.h=setTimeout(()=>t.className='',2200)}
+let L=localStorage.lang||(/^zh/i.test(navigator.language||'')?'zh':'en');
+const ZH={'THU24FD e-inventory':'THU24FD 电子库存','二十四节令鼓社 · Tsinghua University':'二十四节令鼓社 · 清华大学','↻ Refresh':'↻ 刷新','Loading…':'加载中…',
+'👕 Clothes':'👕 服装','🥁 Instruments & others':'🥁 乐器及其他','📦 Stock':'📦 库存','📤 Check out':'📤 借出','📥 Returns':'📥 归还','⚙️ Setup':'⚙️ 设置','📊 Reports':'📊 报表',
+'Total pieces':'总件数','Out':'借出','In store':'在库','Total':'总数','Name':'名称','Variation':'款式','Costumes':'表演服','Shirts':'队服','Items':'物品','Other items':'其他物品',
+'🔍 Search items…':'🔍 搜索物品…','🔍 Filter items…':'🔍 筛选物品…','All':'全部','Any status':'任何状态','Out now':'借出中','None left':'已无库存','Any category':'任何类别','All categories':'全部类别','No items match.':'没有符合的物品。','Nothing here yet. Add items in Setup.':'暂无物品，请在“设置”中添加。',
+'Performance':'演出','Member':'成员','Item':'物品','Quantity':'数量','Remarks (optional)':'备注（可选）','e.g. slightly loose, missing a button':'例如：稍大、缺一颗纽扣','+ New':'+ 新建','No performance yet':'还没有演出','Choose member…':'选择成员…','No match':'没有匹配','Give out':'借出',
+'Recorded for this performance':'本场演出的借出记录','Delete selected':'删除所选','Select all':'全选','Nothing recorded yet.':'暂无记录。','Returned':'已归还','Enter the site password to confirm deleting':'请输入网站密码以确认删除','Confirm':'确认','Cancel':'取消','Deleted':'已删除','Recorded ✓':'已记录 ✓',
+'All performances':'全部演出','All members':'全部成员','Return date & time (starts as now; change it if needed)':'归还日期和时间（默认现在，可修改）','Return all':'全部归还','Return':'归还','Nothing is out right now.':'目前没有借出的物品。','OK':'正常','Needs cleaning':'需清洗','Damaged':'破损','Lost':'丢失','Returned ✓':'已归还 ✓','Remarks':'备注',
+'Members':'成员','Performances':'演出','Search…':'搜索…','+ Add':'+ 添加','All roles':'全部角色','Nothing yet. Tap “+ Add”.':'暂无内容，点击“+ 添加”。','+ Variation':'+ 款式','Archived':'已归档','Inactive':'已停用','Edit':'编辑','+ Add here':'+ 在此添加','Uncategorised':'未分类','Nothing here yet. Tap “+ Add” to start, for example drums, sticks or souvenirs.':'暂无内容。点击“+ 添加”开始，例如鼓、鼓棒或纪念品。',
+'Name *':'名称 *','Student ID 学号':'学号','WeChat':'微信','Role':'角色','drummer, committee…':'例如：鼓手、干事…','Performance name *':'演出名称 *','Date':'日期','Current PIN (only needed to change it)':'当前PIN（仅修改时需要）','New PIN, 4–8 digits (leave blank to keep)':'新PIN，4–8位数字（留空则不修改）','Set a return PIN (4–8 digits)':'设置归还PIN（4–8位数字）','Return PIN * (4–8 digits)':'归还PIN *（4–8位数字）','Not set yet':'尚未设置','Needed to approve returns':'用于批准归还',
+'Name / design *':'名称／款式 *','Item name *':'物品名称 *','Category':'类别','e.g. Top, Under layer, Skirt, Accessory':'例如：上衣、内搭、裙子、配饰','Colour (optional)':'颜色（可选）','Size (blank = One size)':'尺码（留空 = 均码）','Total quantity':'总数量','Remarks (optional)':'备注（可选）','Variations and quantities (size and/or colour; leave size blank for One size)':'款式与数量（尺码和／或颜色；尺码留空表示均码）','Size':'尺码','Colour':'颜色','Qty':'数量','+ Add another variation':'+ 再添加一个款式',
+'Save':'保存','Save & add another':'保存并继续添加','Restore':'恢复','Make inactive':'设为停用','Archive':'归档','Delete':'删除','Saved ✓':'已保存 ✓','Updated ✓':'已更新 ✓','PIN changed ✓':'PIN已修改 ✓',
+'Records':'记录','Status':'状态','Still out':'未归还','Showing the newest 100. Narrow the filters, or download Excel for everything.':'仅显示最新100条。请缩小筛选范围，或下载Excel查看全部。','Download Excel report':'下载 Excel 报表','Stock, items currently out, performance records and members for this section.':'本板块的库存、借出中的物品、演出记录和成员。','Backup':'备份','Download a backup regularly and keep it somewhere safe.':'请定期下载备份并妥善保存。','Download full backup':'下载完整备份','Replaces ALL current data with the backup file.':'将用备份文件替换全部现有数据。','Restored ✓':'已恢复 ✓',
+'Create a performance first (tap + New).':'请先创建演出（点击“+ 新建”）。','Choose a member.':'请选择成员。','Choose an item.':'请选择物品。','Tick the records to delete first.':'请先勾选要删除的记录。','Tick the items to return first.':'请先勾选要归还的物品。','Check the return date.':'请检查归还日期。','Name is required.':'名称不能为空。','Date is required.':'日期不能为空。','The PIN must be 4 to 8 digits.':'PIN必须是4–8位数字。','Enter at least one variation with a quantity (leave size blank for "One size").':'请至少输入一个款式及数量（尺码留空表示均码）。',
+'This REPLACES all current data with the backup. Continue?':'这将用备份替换全部现有数据，是否继续？','No connection. Please try again.':'网络连接失败，请重试。','Password':'密码','Up to date ✓':'已是最新 ✓','Could not load the Excel library. Check your connection.':'无法加载Excel组件，请检查网络。','Could not make the backup. Try again.':'无法生成备份，请重试。',
+'Not enough in store (someone may have just taken it).':'库存不足（可能刚被别人借走）。','The return time is earlier than the check-out time. Check the date.':'归还时间早于借出时间，请检查日期。','Wrong password. Nothing was deleted.':'密码错误，未删除任何内容。','The current PIN is wrong. PIN not changed.':'当前PIN错误，PIN未修改。','The new PIN must be 4 to 8 digits.':'新PIN必须是4–8位数字。','Enter a PIN of 4 to 8 digits.':'请输入4–8位数字的PIN。','It has records, so it was archived / made inactive instead of deleted.':'该项已有记录，因此改为归档／停用，未删除。','This performance has records, so it cannot be deleted.':'该演出已有记录，无法删除。'};
+const RX=[[/^Return selected \((\d+)\)$/,'退还所选 ($1)'],[/^Select all \((\d+)\)$/,'全选 ($1)'],[/^(\d+) record\(s\)$/,'$1 条记录'],[/^Delete (\d+) record\(s\)\? This cannot be undone\.$/,'确定删除 $1 条记录？此操作无法撤销。'],
+[/^(Add|Edit) (member|performance|costume|shirt|item)$/,m=>(m[1]=='Add'?'添加':'编辑')+{member:'成员',performance:'演出',costume:'表演服',shirt:'队服',item:'物品'}[m[2]]],
+[/^Show (inactive|archived)$/,m=>m[1]=='inactive'?'显示已停用':'显示已归档'],[/^Excel report — (.*)$/,m=>'Excel 报表 — '+(m[1]=='clothes'?'服装':'乐器及其他')],
+[/^(\d+) out · (\d+) in store(.*)$/,'借出 $1 · 在库 $2$3'],[/^Enter the PIN for “(.*)” to approve the return$/,'请输入“$1”的PIN以批准归还'],
+[/^Wrong PIN for “(.*)”\. Nothing was recorded\..*$/,'“$1”的PIN错误，未记录任何内容。只有持有PIN的人才能批准归还。'],[/^Delete “(.*)”\? If it has records, it will be archived instead\.$/,'删除“$1”？如果已有记录，将改为归档。'],
+[/^(.*) already exists\. Close this and tap Edit on it instead\.$/,'$1 已存在。请关闭此窗口，改为点击其“编辑”。'],[/^Server error: (.*)$/,'服务器错误：$1'],
+[/^(.*) · (\d+) records · (🔒 PIN set|⚠️ no PIN)$/,m=>m[1]+' · '+m[2]+' 条记录 · '+(m[3].startsWith('🔒')?'🔒 已设PIN':'⚠️ 未设PIN')]];
+const INL=[[/ — (\d+) left\b/g,' — 剩余 $1'],[/\bOne size\b/g,'均码']],has=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
+const trz=s=>{if(L!='zh'||typeof s!='string')return s;const k=s.trim();if(!k)return s;if(has(ZH,k))return s.replace(k,()=>ZH[k]);for(const [re,f] of RX){const m=k.match(re);if(m)return s.replace(k,()=>typeof f=='function'?f(m):k.replace(re,f))}return INL.reduce((a,[re,r])=>a.replace(re,r),s)};
+const AT=['placeholder','label','title'];
+function txNode(n){if(n.nodeType==3){const p=n.parentNode;if(p&&/^(SCRIPT|STYLE)$/.test(p.nodeName))return;if(n.__en===undefined)n.__en=n.nodeValue;const v=L=='zh'?trz(n.__en):n.__en;if(n.nodeValue!==v)n.nodeValue=v}
+ else if(n.nodeType==1)for(const a of AT)if(n.hasAttribute(a)){const k='__en_'+a;if(n[k]===undefined)n[k]=n.getAttribute(a);const v=L=='zh'?trz(n[k]):n[k];if(n.getAttribute(a)!==v)n.setAttribute(a,v)}}
+function tx(root){if(!root||!document.createTreeWalker)return;txNode(root);const w=document.createTreeWalker(root,5);for(let n=w.nextNode();n;n=w.nextNode())txNode(n)}
+if(typeof MutationObserver!='undefined')new MutationObserver(ms=>{if(L=='zh')for(const m of ms)m.addedNodes.forEach(tx)}).observe(document.body,{childList:true,subtree:true});
+{const a=window.alert.bind(window),c=window.confirm.bind(window),p=window.prompt&&window.prompt.bind(window);window.alert=m=>a(trz(m));window.confirm=m=>c(trz(m));if(p)window.prompt=m=>p(trz(m))}
+function setLang(){L=L=='zh'?'en':'zh';localStorage.lang=L;closeM();document.documentElement.lang=L=='zh'?'zh-CN':'en';document.title=L=='zh'?'THU24FD 电子库存':'THU24FD e-inventory';render();tx(document.body)}
 async function api(b){let r;try{r=await fetch('/api',{method:b?'POST':'GET',cache:'no-store',headers:{'x-pass':P,'content-type':'application/json'},body:b&&JSON.stringify(b)})}catch(e){alert('No connection. Please try again.');throw e}
  if(r.status==401){const p=prompt('Password');if(!p)throw 0;P=p;localStorage.pw=p;return api(b)}
  if(!r.ok&&r.status!=409){let m='Error '+r.status;try{m=(await r.json()).err||m}catch(e){}alert(m);throw 0}return r.json()}
@@ -83,7 +127,7 @@ function render(){const subs=U.sec=='other'?['members','other','perfs']:['member
  if(document.body)document.body.dataset.sec=U.sec;
  $('#secbar').innerHTML=`<button class="${U.sec!='other'?'on':''}" onclick="setSec('clothes')">👕 Clothes</button><button class="${U.sec=='other'?'on':''}" onclick="setSec('other')">🥁 Instruments &amp; others</button>`;
 if(!S.perfs.some(p=>p.id==U.perf))U.perf=S.perfs[0]?.id||'';
- $('#nav').innerHTML=Object.entries(TABS).map(([k,l])=>`<button class="${k==U.tab?'on':''}" onclick="U.tab='${k}';U.q='';render();scrollTo(0,0)">${l}</button>`).join('');$('#app').innerHTML=v[U.tab]()}
+ $('#langbtn').textContent=L=='zh'?'English':'中文';$('#nav').innerHTML=Object.entries(TABS).map(([k,l])=>`<button class="${k==U.tab?'on':''}" onclick="U.tab='${k}';U.q='';render();scrollTo(0,0)">${l}</button>`).join('');$('#app').innerHTML=v[U.tab]()}
 /* STOCK */
 const inSec=i=>(i.kind=='other')==(U.sec=='other'),kindsOf=()=>U.sec=='other'?['other']:['costume','shirt'],SL=()=>S.loans.filter(l=>inSec(it(l.item_id))),cats=()=>[...new Set(S.items.filter(inSec).map(i=>i.category).filter(Boolean))].sort();
 function setSec(k){U.sec=k;localStorage.sec=k;Object.assign(U,{q:'',ft:'',fs:'',fc:'',ot:'',oc:'',oq:'',sc:'',arch:0,item:'',f:'',fm:''});render();scrollTo(0,0)}
@@ -115,7 +159,7 @@ async function give(){const mem=$('#mem').value,item=$('#item').value;
 async function delSel(){const ids=[...document.querySelectorAll('.dsel:checked')].map(e=>+e.value);if(!ids.length)return alert('Tick the records to delete first.');
  if(!confirm('Delete '+ids.length+' record(s)? This cannot be undone.'))return;
  const pin=await askPin('Enter the site password to confirm deleting',0);if(pin==null)return;await act({a:'delrec',ids,pin},'Deleted')}
-const askPin=(msg,num)=>new Promise(res=>{$('#modal').innerHTML=`<div class=ov><div class=md><h3>${esc(msg)}</h3><input id=pinin type=password ${num?'inputmode=numeric':''} autocomplete=off style="font-size:22px;text-align:center" onkeydown="if(event.key=='Enter')pinDone(1)"><div class=row style="margin-top:16px"><button class=btn onclick="pinDone(1)">OK</button><button class="btn ghost" onclick="pinDone(0)">Cancel</button></div></div></div>`;window.pinDone=ok=>{const x=ok?$('#pinin').value:null;closeM();res(x)};setTimeout(()=>$('#pinin').focus(),60)});
+const askPin=(msg,num)=>new Promise(res=>{$('#modal').innerHTML=`<div class=ov><div class=md><h3>${esc(msg)}</h3><input id=pinin type=password ${num?'inputmode=numeric':''} autocomplete=off style="font-size:22px;text-align:center" onkeydown="if(event.key=='Enter')pinDone(1)"><div class=row style="margin-top:16px"><button class=btn onclick="pinDone(1)">Confirm</button><button class="btn ghost" onclick="pinDone(0)">Cancel</button></div></div></div>`;window.pinDone=ok=>{const x=ok?$('#pinin').value:null;closeM();res(x)};setTimeout(()=>$('#pinin').focus(),60)});
 /* RETURNS */
 /* RETURNS */
 v.ret=()=>{const f=U.f,g={},open=SL().filter(l=>!l.returned_at&&(!f||l.perf_id==f)&&(!U.fm||l.member_id==U.fm));open.forEach(l=>(g[l.member_id+'-'+l.perf_id]??=[]).push(l));
@@ -124,7 +168,7 @@ return `<div class=card><div class=grid><div><label class=f>Performance</label><
 <div class=span><label class=f>Return date &amp; time (starts as now; change it if needed)</label><input id=rdt type=datetime-local value="${nowL()}" onchange="this.dataset.t=1"></div></div></div>`+
 (open.length?`<div class=card><div class=row style="justify-content:space-between"><label class=chk style="margin:0"><input type=checkbox onchange="selAll(this.checked)">Select all (${open.length})</label><button class=btn id=selbtn onclick=retSel()>Return selected (0)</button></div></div>`:'')+
 (Object.values(g).map(a=>`<div class=card><div class=row style="justify-content:space-between;flex-wrap:nowrap"><div><b>${esc(mb(a[0].member_id).name)}</b><div class=sub>${esc(pf(a[0].perf_id).name)} · ${pf(a[0].perf_id).date}${pf(a[0].perf_id).has_pin?' · 🔒 PIN':''}</div></div><button class="btn ghost sm" onclick="ret([${a.map(l=>l.id)}])">Return all</button></div>`+
-a.map(l=>`<div class=ret><input type=checkbox class=rsel value=${l.id} onchange=selCount()><div><b>${esc(lab(it(l.item_id)))} × ${l.qty}</b><div class=sub>${T(l.out_at)}${l.out_note?' · '+esc(l.out_note):''}</div></div><select id=c${l.id}>${['OK','Needs cleaning','Damaged','Lost'].map(c=>`<option>${c}`).join('')}</select><input id=n${l.id} placeholder="Remarks (optional)"><button class="btn sm" onclick="ret([${l.id}])">Return</button></div>`).join('')+'</div>').join('')||'<div class=card><p class=mut>Nothing is out right now.</p></div>')};
+a.map(l=>`<div class=ret><input type=checkbox class=rsel value=${l.id} onchange=selCount()><div><b>${esc(lab(it(l.item_id)))} × ${l.qty}</b><div class=sub>${T(l.out_at)}${l.out_note?' · '+esc(l.out_note):''}</div></div><select id=c${l.id}>${['OK','Needs cleaning','Damaged','Lost'].map(c=>`<option value="${c}">${c}`).join('')}</select><input id=n${l.id} placeholder="Remarks (optional)"><button class="btn sm" onclick="ret([${l.id}])">Return</button></div>`).join('')+'</div>').join('')||'<div class=card><p class=mut>Nothing is out right now.</p></div>')};
 const selCount=()=>{const b=$('#selbtn');if(b)b.textContent='Return selected ('+document.querySelectorAll('.rsel:checked').length+')'};
 const selAll=c=>{document.querySelectorAll('.rsel').forEach(e=>e.checked=c);selCount()};
 const retSel=()=>{const ids=[...document.querySelectorAll('.rsel:checked')].map(e=>+e.value);ids.length?ret(ids):alert('Tick the items to return first.')};
@@ -213,5 +257,6 @@ async function xl(){if(!window.XLSX&&!await loadX())return alert('Could not load
  XLSX.writeFile(w,`${U.sec=='other'?'others':'clothes'}-inventory-${today()}.xlsx`)}
 async function bk(){const r=await fetch('/api?backup=1',{cache:'no-store',headers:{'x-pass':P}});if(!r.ok)return alert('Could not make the backup. Try again.');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([await r.text()],{type:'application/json'}));a.download=`backup-${today()}.json`;a.click()}
 async function rs(el){const f=el.files[0];if(f&&confirm('This REPLACES all current data with the backup. Continue?'))await act({a:'restore',data:JSON.parse(await f.text())},'Restored ✓')}
+if(L=='zh'){document.documentElement.lang='zh-CN';document.title='THU24FD 电子库存';tx(document.body)}
 load();
 </script></body></html>
