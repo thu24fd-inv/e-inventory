@@ -1,0 +1,273 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n<meta name="description" content="THU24FD inventory management for costumes, instruments, check-outs and returns.">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="THU24FD">
+<meta name="theme-color" content="#ffffff"><link rel="icon" href="logo.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>THU24FD e-inventory</title>
+<style>
+:root{--p:#6b0973;--p2:#f4e9f5;--bg:#f6f4f7;--tx:#211b23;--mut:#7b707e;--ln:#e8e1ea;--ok:#1b7f4b;--bad:#b3261e}
+*{box-sizing:border-box}
+body{margin:0;font:17px/1.4 -apple-system,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--tx);-webkit-text-size-adjust:100%}
+header{position:sticky;top:0;z-index:10;box-shadow:0 2px 14px rgba(60,10,70,.14)}
+.top{display:flex;align-items:center;gap:12px;padding:12px max(18px,calc((100% - 924px)/2));background:linear-gradient(120deg,#56065f,#92299e);color:#fff}
+.top img{width:46px;height:46px;background:#fff;border-radius:12px;padding:4px}.t1{font-weight:700;font-size:18px}.t2{font-size:13px;color:#ecd6ef}
+.top .btn.ghost{background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.45)}
+nav{display:flex;gap:4px;padding:6px max(10px,calc((100% - 940px)/2));background:#fff;border-bottom:1px solid var(--ln);overflow-x:auto}
+nav button{flex:1;height:46px;padding:0 10px;border:0;border-radius:10px;background:none;font:inherit;font-size:15px;font-weight:600;color:var(--mut);white-space:nowrap}
+nav .on{background:var(--p2);color:var(--p)}
+main{max-width:960px;margin:auto;padding:20px 16px 60px}
+h3{margin:0 0 12px;font-size:18px}
+.card{background:#fff;border:1px solid var(--ln);border-radius:14px;padding:16px;margin-bottom:16px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.span{grid-column:1/-1}
+label.f{display:block;font-size:14px;color:var(--mut);margin-bottom:4px}
+input,select{width:100%;min-width:0;height:48px;padding:0 12px;font:inherit;color:inherit;border:1px solid #cfc6d2;border-radius:10px;background:#fff}
+input:focus,select:focus,button:focus-visible{outline:3px solid color-mix(in srgb,var(--p) 35%,transparent);outline-offset:2px}
+button:disabled{opacity:.55;cursor:not-allowed}
+button:active:not(:disabled){transform:translateY(1px)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+.t th{white-space:nowrap}.t td{vertical-align:middle}.t input{max-width:100%}
+.card h3{line-height:1.3}#toast{max-width:calc(100vw - 32px);text-align:center}button,.chip{touch-action:manipulation}
+@media(max-width:480px){.stats{gap:7px}.tile{padding:10px 6px}.tile .n{font-size:24px}.tile .l{font-size:12px}.card{padding:13px}.btn{padding:0 14px}.ret{gap:8px}.sz{grid-template-columns:1fr 1fr 70px auto}}
+input[type=checkbox]{width:22px;height:22px;accent-color:var(--p)}
+.chk{display:flex;gap:10px;align-items:center;margin:12px 0 4px;font-size:15px;color:var(--mut)}
+.btn{height:48px;padding:0 20px;border-radius:10px;border:1px solid var(--p);background:var(--p);color:#fff;font:inherit;font-weight:600;white-space:nowrap;cursor:pointer}
+.btn.ghost{background:#fff;color:var(--p)}.btn.sm{height:38px;padding:0 14px;font-size:15px}.btn.bad{color:var(--bad);border-color:#e5b9b5}.btn.wide{width:100%}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.tile{background:#fff;border:1px solid var(--ln);border-radius:14px;padding:14px;text-align:center}.tile .n{font-size:30px;font-weight:700}.tile .l{font-size:14px;color:var(--mut)}
+.tile.hl{background:var(--p);border-color:var(--p);color:#fff}.tile.hl .l{color:#e9d3ec}
+table.t{width:100%;border-collapse:collapse}.t th{font-size:13px;color:var(--mut);font-weight:600;text-align:left;padding:6px 8px}
+.t td{padding:8px;border-top:1px solid var(--ln)}.r{text-align:right!important}.t input{width:76px;height:40px;text-align:center}.zero{color:var(--bad);font-weight:700}
+.seg{display:flex;gap:4px;background:#ece4ee;padding:4px;border-radius:12px;margin-bottom:16px;overflow-x:auto}
+.seg button{flex:1;height:42px;padding:0 14px;border:0;border-radius:9px;background:none;font:inherit;font-weight:600;color:var(--p);white-space:nowrap}
+.seg .on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.grp{border-top:1px solid var(--ln);padding-top:12px;margin-top:8px}.grp:first-child{border:0;margin-top:0;padding-top:0}.sz{display:grid;grid-template-columns:1fr 1fr 80px auto;gap:8px}
+.li{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--ln)}.li:first-child{border-top:0}.li .g{flex:1;min-width:0}.off{opacity:.55}
+.sub,.mut{font-size:14px;color:var(--mut)}
+.pill{font-size:12px;padding:2px 8px;border-radius:99px;background:#eee;color:var(--mut);font-weight:600}.pill.ok{background:#dff3e8;color:var(--ok)}
+.qty{display:flex;gap:6px}.qty button{width:48px;height:48px;border-radius:10px;border:1px solid #cfc6d2;background:#fff;font-size:22px;color:var(--p)}.qty input{text-align:center}
+.ret{display:grid;grid-template-columns:auto 1.2fr 150px 1fr auto;gap:10px;align-items:center;padding:12px 0;border-top:1px solid var(--ln);margin-top:8px}
+@media(max-width:700px){.ret{grid-template-columns:1fr}.t1{font-size:16px}}
+.ov{position:fixed;inset:0;background:rgba(20,10,24,.45);display:flex;align-items:center;justify-content:center;z-index:30;padding:12px}
+.md{background:#fff;border-radius:16px;padding:20px;width:min(520px,100%);max-height:92vh;overflow:auto}.form{display:grid;gap:12px}
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#2b2230;color:#fff;padding:12px 20px;border-radius:99px;opacity:0;pointer-events:none;transition:.2s;z-index:40}#toast.show{opacity:1}
+.card{border-radius:16px;box-shadow:0 1px 4px rgba(60,10,70,.07)}.tile{border-radius:16px;box-shadow:0 1px 4px rgba(60,10,70,.07)}.tile.hl{background:linear-gradient(135deg,#6b0973,#9a2aa3)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.chip{height:38px;padding:0 16px;border-radius:99px;border:1px solid #cfc6d2;background:#fff;font:inherit;font-size:15px;color:var(--tx)}.chip.on{background:var(--p);border-color:var(--p);color:#fff}
+.fl{font-size:13px;color:var(--mut);margin:14px 0 0}.btn{box-shadow:0 1px 2px rgba(60,10,70,.15)}.btn.ghost{box-shadow:none}
+input[type=date],input[type=datetime-local]{display:block;-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;text-align:left;line-height:48px}
+input[type=date]::-webkit-date-and-time-value,input[type=datetime-local]::-webkit-date-and-time-value{text-align:left;min-height:1.2em}
+.grid>*{min-width:0}
+.secbar{display:flex;gap:8px;padding:8px max(10px,calc((100% - 940px)/2));background:#faf7fb;border-bottom:1px solid var(--ln)}
+.secbar button{flex:1;height:44px;border-radius:10px;border:1px solid #d9cfdc;background:#fff;font:inherit;font-weight:700;color:var(--mut)}
+.secbar .on{background:var(--p);border-color:var(--p);color:#fff}
+body[data-sec=other]{--p:#0b6b7a;--p2:#e0f2f4}
+body[data-sec=other] .top{background:linear-gradient(120deg,#07424d,#1a8797)}
+body[data-sec=other] .tile.hl{background:linear-gradient(135deg,#0b6b7a,#1a8797)}
+body[data-sec=other] .secbar{background:#f1f8f9}
+
+.top{padding:12px 20px}
+.shell{display:flex;gap:20px;max-width:1120px;margin:auto;padding:18px 16px 60px;align-items:flex-start}
+aside{width:184px;flex:none;position:sticky;top:88px}
+nav{display:flex;flex-direction:column;gap:4px;padding:0;background:none;border:0;overflow:visible}
+nav button{flex:none;width:100%;height:48px;text-align:left;padding:0 14px;border-radius:12px;font-size:16px}
+.secbar{display:flex;gap:2px;padding:2px;margin:22px 0 0;background:#ece6ee;border-radius:8px;border:0;width:fit-content}
+.secbar button{flex:none;height:26px;padding:0 10px;border:0;border-radius:6px;background:none;font:inherit;font-size:12px;font-weight:600;color:#9a8f9d}
+.secbar .on{background:#fff;color:var(--p);box-shadow:0 1px 2px rgba(0,0,0,.14)}
+body[data-sec=other] .secbar{background:#e1ecee}
+main{flex:1;min-width:0;max-width:none;margin:0;padding:0}
+@media(max-width:700px){.shell{flex-direction:column;gap:10px;padding:10px 12px 50px}aside{width:100%;position:static}nav{flex-direction:row;overflow-x:auto}nav button{width:auto;flex:none;white-space:nowrap;height:42px}.secbar{margin-top:8px}}
+</style></head><body>
+<header><div class=top><img src="logo.png" alt=""><div><div class=t1>THU24FD e-inventory</div><div class=t2>二十四节令鼓社 · Tsinghua University</div></div><button class="btn ghost sm" id=langbtn style="margin-left:auto" onclick="setLang()">中文</button><button class="btn ghost sm" onclick="load().then(()=>toast('Up to date ✓'))">↻ Refresh</button></div></header>
+<div class=shell><aside><nav id=nav></nav><div class=secbar id=secbar></div></aside><main id=app>Loading…</main></div><div id=modal></div><div id=toast></div>
+<script src="/xlsx.full.min.js"></script>
+<script>
+let S={members:[],items:[],perfs:[],loans:[]},P=localStorage.pw||'',v={};
+let U={tab:'stock',sub:'members',q:'',arch:0,perf:localStorage.perf||'',mem:'',item:'',qty:1,note:'',f:'',fm:'',ft:'',fs:'',ot:'',oq:'',mr:'',fc:'',oc:'',sc:'',rp:'',rm:'',rs:'',sec:localStorage.sec||'clothes',edit:null};
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>'&#'+c.charCodeAt(0)+';'),T=s=>new Date(s).toLocaleString(L=='zh'?'zh-CN':[], {dateStyle:'medium',timeStyle:'short'});
+const it=id=>S.items.find(i=>i.id==id)||{},mb=id=>S.members.find(m=>m.id==id)||{},pf=id=>S.perfs.find(p=>p.id==id)||{};
+const vl=i=>[i.color,i.size].filter(Boolean).join(' · '),lab=i=>(i.name||'')+(vl(i)?' · '+vl(i):''),nowL=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,16),today=()=>nowL().slice(0,10);
+const perfOpts=s=>S.perfs.map(p=>`<option value=${p.id} ${p.id==s?'selected':''}>${esc(p.name)} · ${p.date}</option>`).join('');
+function toast(m){const t=$('#toast');t.textContent=trz(m);t.className='show';clearTimeout(toast.h);toast.h=setTimeout(()=>t.className='',2200)}
+let L=localStorage.lang||(/^zh/i.test(navigator.language||'')?'zh':'en');
+const ZH={'THU24FD e-inventory':'THU24FD 电子库存','二十四节令鼓社 · Tsinghua University':'二十四节令鼓社 · 清华大学','↻ Refresh':'↻ 刷新','Loading…':'加载中…',
+'👕 Clothes':'👕 服装','🥁 Instruments & others':'🥁 乐器及其他','📦 Stock':'📦 库存','📤 Check out':'📤 借出','📥 Returns':'📥 归还','⚙️ Setup':'⚙️ 设置','📊 Reports':'📊 报表',
+'Total pieces':'总件数','Out':'借出','In store':'在库','Total':'总数','Name':'名称','Variation':'款式','Costumes':'表演服','Shirts':'队服','Items':'物品','Other items':'其他物品',
+'🔍 Search items…':'🔍 搜索物品…','🔍 Filter items…':'🔍 筛选物品…','All':'全部','Any status':'任何状态','Out now':'借出中','None left':'已无库存','Any category':'任何类别','All categories':'全部类别','No items match.':'没有符合的物品。','Nothing here yet. Add items in Setup.':'暂无物品，请在“设置”中添加。',
+'Performance':'演出','Member':'成员','Item':'物品','Quantity':'数量','Remarks (optional)':'备注（可选）','e.g. slightly loose, missing a button':'例如：稍大、缺一颗纽扣','+ New':'+ 新建','No performance yet':'还没有演出','Choose member…':'选择成员…','No match':'没有匹配','Give out':'借出',
+'Recorded for this performance':'本场演出的借出记录','Delete selected':'删除所选','Select all':'全选','Nothing recorded yet.':'暂无记录。','Returned':'已归还','Enter the site password to confirm deleting':'请输入网站密码以确认删除','Confirm':'确认','Cancel':'取消','Deleted':'已删除','Recorded ✓':'已记录 ✓',
+'All performances':'全部演出','All members':'全部成员','Return date & time (starts as now; change it if needed)':'归还日期和时间（默认现在，可修改）','Return all':'全部归还','Return':'归还','Nothing is out right now.':'目前没有借出的物品。','OK':'正常','Needs cleaning':'需清洗','Damaged':'破损','Lost':'丢失','Returned ✓':'已归还 ✓','Remarks':'备注',
+'Members':'成员','Performances':'演出','Search…':'搜索…','+ Add':'+ 添加','All roles':'全部角色','Nothing yet. Tap “+ Add”.':'暂无内容，点击“+ 添加”。','+ Variation':'+ 款式','Archived':'已归档','Inactive':'已停用','Edit':'编辑','+ Add here':'+ 在此添加','Uncategorised':'未分类','Nothing here yet. Tap “+ Add” to start, for example drums, sticks or souvenirs.':'暂无内容。点击“+ 添加”开始，例如鼓、鼓棒或纪念品。',
+'Name *':'名称 *','Student ID 学号':'学号','WeChat':'微信','Role':'角色','drummer, committee…':'例如：鼓手、干事…','Performance name *':'演出名称 *','Date':'日期','Current PIN (only needed to change it)':'当前PIN（仅修改时需要）','New PIN, 4–8 digits (leave blank to keep)':'新PIN，4–8位数字（留空则不修改）','Set a return PIN (4–8 digits)':'设置归还PIN（4–8位数字）','Return PIN * (4–8 digits)':'归还PIN *（4–8位数字）','Not set yet':'尚未设置','Needed to approve returns':'用于批准归还',
+'Name / design *':'名称／款式 *','Item name *':'物品名称 *','Category':'类别','e.g. Top, Under layer, Skirt, Accessory':'例如：上衣、内搭、裙子、配饰','Colour (optional)':'颜色（可选）','Size (blank = One size)':'尺码（留空 = 均码）','Total quantity':'总数量','Remarks (optional)':'备注（可选）','Variations and quantities (size and/or colour; leave size blank for One size)':'款式与数量（尺码和／或颜色；尺码留空表示均码）','Size':'尺码','Colour':'颜色','Qty':'数量','+ Add another variation':'+ 再添加一个款式',
+'Save':'保存','Save & add another':'保存并继续添加','Restore':'恢复','Make inactive':'设为停用','Archive':'归档','Delete':'删除','Saved ✓':'已保存 ✓','Updated ✓':'已更新 ✓','PIN changed ✓':'PIN已修改 ✓',
+'Records':'记录','Status':'状态','Still out':'未归还','Showing the newest 100. Narrow the filters, or download Excel for everything.':'仅显示最新100条。请缩小筛选范围，或下载Excel查看全部。','Download Excel report':'下载 Excel 报表','Stock, items currently out, performance records and members for this section.':'本板块的库存、借出中的物品、演出记录和成员。','Backup':'备份','Download a backup regularly and keep it somewhere safe.':'请定期下载备份并妥善保存。','Download full backup':'下载完整备份','Replaces ALL current data with the backup file.':'将用备份文件替换全部现有数据。','Restored ✓':'已恢复 ✓',
+'Create a performance first (tap + New).':'请先创建演出（点击“+ 新建”）。','Choose a member.':'请选择成员。','Choose an item.':'请选择物品。','Tick the records to delete first.':'请先勾选要删除的记录。','Tick the items to return first.':'请先勾选要归还的物品。','Check the return date.':'请检查归还日期。','Name is required.':'名称不能为空。','Date is required.':'日期不能为空。','The PIN must be 4 to 8 digits.':'PIN必须是4–8位数字。','Enter at least one variation with a quantity (leave size blank for "One size").':'请至少输入一个款式及数量（尺码留空表示均码）。',
+'This REPLACES all current data with the backup. Continue?':'这将用备份替换全部现有数据，是否继续？','No connection. Please try again.':'网络连接失败，请重试。','Password':'密码','Up to date ✓':'已是最新 ✓','Could not load the Excel library. Check your connection.':'无法加载Excel组件，请检查网络。','Could not make the backup. Try again.':'无法生成备份，请重试。',
+'Not enough in store (someone may have just taken it).':'库存不足（可能刚被别人借走）。','The return time is earlier than the check-out time. Check the date.':'归还时间早于借出时间，请检查日期。','Wrong password. Nothing was deleted.':'密码错误，未删除任何内容。','The current PIN is wrong. PIN not changed.':'当前PIN错误，PIN未修改。','The new PIN must be 4 to 8 digits.':'新PIN必须是4–8位数字。','Enter a PIN of 4 to 8 digits.':'请输入4–8位数字的PIN。','It has records, so it was archived / made inactive instead of deleted.':'该项已有记录，因此改为归档／停用，未删除。','This performance has records, so it cannot be deleted.':'该演出已有记录，无法删除。'};
+const RX=[[/^Return selected \((\d+)\)$/,'退还所选 ($1)'],[/^Select all \((\d+)\)$/,'全选 ($1)'],[/^(\d+) record\(s\)$/,'$1 条记录'],[/^Delete (\d+) record\(s\)\? This cannot be undone\.$/,'确定删除 $1 条记录？此操作无法撤销。'],
+[/^(Add|Edit) (member|performance|costume|shirt|item)$/,m=>(m[1]=='Add'?'添加':'编辑')+{member:'成员',performance:'演出',costume:'表演服',shirt:'队服',item:'物品'}[m[2]]],
+[/^Show (inactive|archived)$/,m=>m[1]=='inactive'?'显示已停用':'显示已归档'],[/^Excel report — (.*)$/,m=>'Excel 报表 — '+(m[1]=='clothes'?'服装':'乐器及其他')],
+[/^(\d+) out · (\d+) in store(.*)$/,'借出 $1 · 在库 $2$3'],[/^Enter the PIN for “(.*)” to approve the return$/,'请输入“$1”的PIN以批准归还'],
+[/^Wrong PIN for “(.*)”\. Nothing was recorded\..*$/,'“$1”的PIN错误，未记录任何内容。只有持有PIN的人才能批准归还。'],[/^Delete “(.*)”\? If it has records, it will be archived instead\.$/,'删除“$1”？如果已有记录，将改为归档。'],
+[/^(.*) already exists\. Close this and tap Edit on it instead\.$/,'$1 已存在。请关闭此窗口，改为点击其“编辑”。'],[/^Server error: (.*)$/,'服务器错误：$1'],
+[/^(.*) · (\d+) records · (🔒 PIN set|⚠️ no PIN)$/,m=>m[1]+' · '+m[2]+' 条记录 · '+(m[3].startsWith('🔒')?'🔒 已设PIN':'⚠️ 未设PIN')]];
+const INL=[[/ — (\d+) left\b/g,' — 剩余 $1'],[/\bOne size\b/g,'均码']],has=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
+const trz=s=>{if(L!='zh'||typeof s!='string')return s;const k=s.trim();if(!k)return s;if(has(ZH,k))return s.replace(k,()=>ZH[k]);for(const [re,f] of RX){const m=k.match(re);if(m)return s.replace(k,()=>typeof f=='function'?f(m):k.replace(re,f))}return INL.reduce((a,[re,r])=>a.replace(re,r),s)};
+const AT=['placeholder','label','title'];
+function txNode(n){if(n.nodeType==3){const p=n.parentNode;if(p&&/^(SCRIPT|STYLE)$/.test(p.nodeName))return;if(n.__en===undefined)n.__en=n.nodeValue;const v=L=='zh'?trz(n.__en):n.__en;if(n.nodeValue!==v)n.nodeValue=v}
+ else if(n.nodeType==1)for(const a of AT)if(n.hasAttribute(a)){const k='__en_'+a;if(n[k]===undefined)n[k]=n.getAttribute(a);const v=L=='zh'?trz(n[k]):n[k];if(n.getAttribute(a)!==v)n.setAttribute(a,v)}}
+function tx(root){if(!root||!document.createTreeWalker)return;txNode(root);const w=document.createTreeWalker(root,5);for(let n=w.nextNode();n;n=w.nextNode())txNode(n)}
+if(typeof MutationObserver!='undefined')new MutationObserver(ms=>{if(L=='zh')for(const m of ms)m.addedNodes.forEach(tx)}).observe(document.body,{childList:true,subtree:true});
+{const a=window.alert.bind(window),c=window.confirm.bind(window),p=window.prompt&&window.prompt.bind(window);window.alert=m=>a(trz(m));window.confirm=m=>c(trz(m));if(p)window.prompt=m=>p(trz(m))}
+function setLang(){L=L=='zh'?'en':'zh';localStorage.lang=L;closeM();document.documentElement.lang=L=='zh'?'zh-CN':'en';document.title=L=='zh'?'THU24FD 电子库存':'THU24FD e-inventory';render();tx(document.body)}
+async function api(b){let r;try{r=await fetch('/api',{method:b?'POST':'GET',cache:'no-store',headers:{'x-pass':P,'content-type':'application/json'},body:b&&JSON.stringify(b)})}catch(e){alert('No connection. Please try again.');throw e}
+ if(r.status==401){const p=prompt('Password');if(!p)throw 0;P=p;localStorage.pw=p;return api(b)}
+ if(!r.ok&&r.status!=409){let m='Error '+r.status;try{m=(await r.json()).err||m}catch(e){}alert(m);throw 0}return r.json()}
+async function load(){S=await api();render()}
+async function poll(){const a=document.activeElement,busy=a&&a.closest('#app')&&/INPUT|SELECT/.test(a.tagName);
+ if(document.hidden||busy||$('#modal').innerHTML||document.querySelector('.rsel:checked,.dsel:checked')||[...document.querySelectorAll('#app input[id^=n]')].some(e=>e.value))return;
+ try{const r=await fetch('/api',{cache:'no-store',headers:{'x-pass':P}});if(!r.ok)return;const n=await r.json();if(JSON.stringify(n)!=JSON.stringify(S)){S=n;render()}}catch(e){}}
+setInterval(poll,10000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)poll()});
+async function act(b,msg){const r=await api(b);if(r.err||r.msg)alert(r.err||r.msg);else if(msg)toast(msg);await load();return r}
+const TABS={stock:'📦 Stock',out:'📤 Check out',ret:'📥 Returns',manage:'⚙️ Setup',rep:'📊 Reports'};
+function render(){const subs=U.sec=='other'?['members','other','perfs']:['members','costume','shirt','perfs'];if(!subs.includes(U.sub))U.sub=U.sec=='other'?'other':'members';
+ if(document.body)document.body.dataset.sec=U.sec;
+ $('#secbar').innerHTML=`<button aria-label="Clothes" title="Clothes" class="${U.sec!='other'?'on':''}" onclick="setSec('clothes')">👕</button><button aria-label="Instruments and others" title="Instruments and others" class="${U.sec=='other'?'on':''}" onclick="setSec('other')">🥁</button>`;
+if(!S.perfs.some(p=>p.id==U.perf))U.perf=S.perfs[0]?.id||'';
+ $('#langbtn').textContent=L=='zh'?'English':'中文';$('#nav').innerHTML=Object.entries(TABS).map(([k,l])=>`<button class="${k==U.tab?'on':''}" onclick="U.tab='${k}';U.q='';render();scrollTo(0,0)">${l}</button>`).join('');$('#app').innerHTML=v[U.tab]()}
+/* STOCK */
+const inSec=i=>(i.kind=='other')==(U.sec=='other'),kindsOf=()=>U.sec=='other'?['other']:['costume','shirt'],SL=()=>S.loans.filter(l=>inSec(it(l.item_id))),cats=()=>[...new Set(S.items.filter(inSec).map(i=>i.category).filter(Boolean))].sort();
+function setSec(k){U.sec=k;localStorage.sec=k;Object.assign(U,{q:'',ft:'',fs:'',fc:'',ot:'',oc:'',oq:'',sc:'',arch:0,item:'',f:'',fm:''});render();scrollTo(0,0)}
+const chip=(l,on,fn)=>`<button class="chip ${on?'on':''}" onclick="${fn}">${l}</button>`;
+const stockTables=()=>{const q=U.q.toLowerCase();return kindsOf().filter(k=>!U.ft||U.ft==k).map(k=>{const r=S.items.filter(i=>{const n=i.total-i.out;return !i.archived&&i.kind==k&&(!U.fc||i.category==U.fc)&&(i.name+vl(i)).toLowerCase().includes(q)&&(!U.fs||(U.fs=='in'?n>0:U.fs=='out'?i.out>0:n<=0))});
+ return `<div class=card><h3>${{costume:'Costumes',shirt:'Shirts',other:'Items'}[k]}</h3>`+(r.length?`<table class=t><tr><th>Name<th>Variation<th class=r>Total<th class=r>Out<th class=r>In store</tr>`+r.map(i=>`<tr><td>${esc(i.name)}${i.category?`<div class=sub>${esc(i.category)}</div>`:''}<td>${esc(vl(i))}<td class=r><input type=number min=0 value=${i.total} onchange="act({a:'save',t:'items',row:{...it(${i.id}),total:+this.value}},'Saved ✓')"><td class=r>${i.out}<td class="r ${i.total-i.out==0?'zero':''}"><b>${i.total-i.out}</b></tr>`).join('')+'</table>':'<p class=mut>No items match.</p>')+'</div>'}).join('')};
+v.stock=()=>{const t=S.items.filter(i=>!i.archived&&inSec(i)),sum=k=>t.reduce((a,i)=>a+i[k],0),tile=(l,n,c='')=>`<div class="tile ${c}"><div class=n>${n}</div><div class=l>${l}</div></div>`;
+ return `<div class=stats>${tile('Total pieces',sum('total'))}${tile('Out',sum('out'))}${tile('In store',sum('total')-sum('out'),'hl')}</div>
+<div class=card><input placeholder="🔍 Search items…" value="${esc(U.q)}" oninput="U.q=this.value;$('#lst').innerHTML=stockTables()">
+${U.sec=='other'?'':`<div class=chips>${chip('All',!U.ft,"U.ft='';render()")}${chip('Costumes',U.ft=='costume',"U.ft='costume';render()")}${chip('Shirts',U.ft=='shirt',"U.ft='shirt';render()")}</div>`}
+<div class=chips>${chip('Any status',!U.fs,"U.fs='';render()")}${chip('In store',U.fs=='in',"U.fs='in';render()")}${chip('Out now',U.fs=='out',"U.fs='out';render()")}${chip('None left',U.fs=='none',"U.fs='none';render()")}</div>${cats().length?`<div class=chips>${chip('Any category',!U.fc,"U.fc='';render()")}${cats().map((c,i)=>chip(esc(c),U.fc==c,`U.fc=cats()[${i}];render()`)).join('')}</div>`:''}</div><div id=lst>${stockTables()}</div>`};
+/* CHECK OUT */
+const itemOpts=()=>{const q=(U.oq||'').toLowerCase(),av=S.items.filter(i=>inSec(i)&&!i.archived&&i.total-i.out>0&&(!U.ot||i.kind==U.ot)&&(!U.oc||i.category==U.oc)&&(i.name+vl(i)).toLowerCase().includes(q)),og=(k,l)=>{const r=av.filter(i=>i.kind==k);return r.length?`<optgroup label="${l}">${r.map(i=>`<option value=${i.id} ${U.item==i.id?'selected':''}>${esc(lab(i))} — ${i.total-i.out} left</option>`).join('')}</optgroup>`:''};return og('costume','Costumes')+og('shirt','Shirts')+og('other','Other items')||'<option value="">No match</option>'};
+v.out=()=>{const cur=SL().filter(l=>l.perf_id==U.perf);
+return `<div class=card><div class=grid>
+<div><label class=f>Performance</label><div class=row style="flex-wrap:nowrap"><select onchange="U.perf=this.value;localStorage.perf=U.perf;render()">${S.perfs.length?perfOpts(U.perf):'<option value="">No performance yet</option>'}</select><button class="btn ghost" onclick="U.sub='perfs';openForm()">+ New</button></div></div>
+<div><label class=f>Member</label><select id=mem onchange="U.mem=this.value"><option value="">Choose member…</option>${S.members.filter(m=>m.active).map(m=>`<option value=${m.id} ${U.mem==m.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select></div>
+<div class=span><label class=f>Item</label><div class=row><input style="flex:1 1 170px" placeholder="🔍 Filter items…" value="${esc(U.oq)}" oninput="U.oq=this.value;$('#item').innerHTML=itemOpts()">${U.sec=='other'?'':`${chip('All',!U.ot,"U.ot='';render()")}${chip('Costumes',U.ot=='costume',"U.ot='costume';render()")}${chip('Shirts',U.ot=='shirt',"U.ot='shirt';render()")}`}${cats().length?`<select style="width:auto;flex:none" onchange="U.oc=this.value;$('#item').innerHTML=itemOpts()"><option value="">All categories</option>${cats().map(c=>`<option ${U.oc==c?'selected':''}>${esc(c)}</option>`).join('')}</select>`:''}</div><select id=item style="margin-top:8px" onchange="U.item=this.value">${itemOpts()}</select></div>
+<div><label class=f>Quantity</label><div class=qty><button onclick="qty(-1)">−</button><input id=qty type=number min=1 value=${U.qty} onchange="U.qty=+this.value||1"><button onclick="qty(1)">+</button></div></div>
+<div class=span><label class=f>Remarks (optional)</label><input placeholder="e.g. slightly loose, missing a button" value="${esc(U.note)}" oninput="U.note=this.value"></div></div>
+<button class="btn wide" style="margin-top:16px" onclick=give()>Give out</button></div>
+<div class=card><div class=row style="justify-content:space-between"><h3 style="margin:0">Recorded for this performance</h3>${cur.length?'<button class="btn bad sm" onclick=delSel()>Delete selected</button>':''}</div>
+${cur.length?`<label class=chk><input type=checkbox onchange="document.querySelectorAll('.dsel').forEach(c=>c.checked=this.checked)">Select all</label>`:''}
+${cur.map(l=>`<div class=li><input type=checkbox class=dsel value=${l.id}><div class=g><b>${esc(mb(l.member_id).name)}</b><div class=sub>${esc(lab(it(l.item_id)))} × ${l.qty}${l.out_note?' · '+esc(l.out_note):''}</div></div><span class="pill ${l.returned_at?'ok':''}">${l.returned_at?'Returned':'Out'}</span></div>`).join('')||'<p class=mut>Nothing recorded yet.</p>'}</div>`};
+function qty(d){U.qty=Math.max(1,(+$('#qty').value||1)+d);$('#qty').value=U.qty}
+async function give(){const mem=$('#mem').value,item=$('#item').value,btn=document.querySelector('#app button[onclick="give()"]');
+ if(!U.perf)return alert('Create a performance first (tap + New).');if(!mem)return alert('Choose a member.');if(!item)return alert('Choose an item.');
+ const quantity=Number($('#qty').value);if(!Number.isSafeInteger(quantity)||quantity<1)return alert('Quantity must be a whole number greater than zero.');
+ if(btn){if(btn.disabled)return;btn.disabled=true;btn.textContent='Saving…'}
+ try{const r=await act({a:'out',perf_id:+U.perf,member_id:+mem,item_id:+item,qty:quantity,note:U.note},'Recorded ✓');if(!r.err){U.qty=1;U.note='';render()}}
+ finally{if(btn&&btn.isConnected){btn.disabled=false;btn.textContent='Give out'}}}
+async function delSel(){const ids=[...document.querySelectorAll('.dsel:checked')].map(e=>+e.value);if(!ids.length)return alert('Tick the records to delete first.');
+ if(!confirm('Delete '+ids.length+' record(s)? This cannot be undone.'))return;
+ const pin=await askPin('Enter the site password to confirm deleting',0);if(pin==null)return;await act({a:'delrec',ids,pin},'Deleted')}
+const askPin=(msg,num)=>new Promise(res=>{$('#modal').innerHTML=`<div class=ov><div class=md><h3>${esc(msg)}</h3><input id=pinin type=password ${num?'inputmode=numeric':''} autocomplete=off style="font-size:22px;text-align:center" onkeydown="if(event.key=='Enter')pinDone(1)"><div class=row style="margin-top:16px"><button class=btn onclick="pinDone(1)">Confirm</button><button class="btn ghost" onclick="pinDone(0)">Cancel</button></div></div></div>`;window.pinDone=ok=>{const x=ok?$('#pinin').value:null;closeM();res(x)};setTimeout(()=>$('#pinin').focus(),60)});
+/* RETURNS */
+/* RETURNS */
+v.ret=()=>{const f=U.f,g={},open=SL().filter(l=>!l.returned_at&&(!f||l.perf_id==f)&&(!U.fm||l.member_id==U.fm));open.forEach(l=>(g[l.member_id+'-'+l.perf_id]??=[]).push(l));
+return `<div class=card><div class=grid><div><label class=f>Performance</label><select onchange="U.f=this.value;render()"><option value="">All performances</option>${perfOpts(f)}</select></div>
+<div><label class=f>Member</label><select onchange="U.fm=this.value;render()"><option value="">All members</option>${S.members.map(m=>`<option value=${m.id} ${U.fm==m.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select></div>
+<div class=span><label class=f>Return date &amp; time (starts as now; change it if needed)</label><input id=rdt type=datetime-local value="${nowL()}" onchange="this.dataset.t=1"></div></div></div>`+
+(open.length?`<div class=card><div class=row style="justify-content:space-between"><label class=chk style="margin:0"><input type=checkbox onchange="selAll(this.checked)">Select all (${open.length})</label><button class=btn id=selbtn onclick=retSel()>Return selected (0)</button></div></div>`:'')+
+(Object.values(g).map(a=>`<div class=card><div class=row style="justify-content:space-between;flex-wrap:nowrap"><div><b>${esc(mb(a[0].member_id).name)}</b><div class=sub>${esc(pf(a[0].perf_id).name)} · ${pf(a[0].perf_id).date}${pf(a[0].perf_id).has_pin?' · 🔒 PIN':''}</div></div><button class="btn ghost sm" onclick="ret([${a.map(l=>l.id)}])">Return all</button></div>`+
+a.map(l=>`<div class=ret><input type=checkbox class=rsel value=${l.id} onchange=selCount()><div><b>${esc(lab(it(l.item_id)))} × ${l.qty}</b><div class=sub>${T(l.out_at)}${l.out_note?' · '+esc(l.out_note):''}</div></div><select id=c${l.id}>${['OK','Needs cleaning','Damaged','Lost'].map(c=>`<option value="${c}">${c}`).join('')}</select><input id=n${l.id} placeholder="Remarks (optional)"><button class="btn sm" onclick="ret([${l.id}])">Return</button></div>`).join('')+'</div>').join('')||'<div class=card><p class=mut>Nothing is out right now.</p></div>')};
+const selCount=()=>{const b=$('#selbtn');if(b)b.textContent='Return selected ('+document.querySelectorAll('.rsel:checked').length+')'};
+const selAll=c=>{document.querySelectorAll('.rsel').forEach(e=>e.checked=c);selCount()};
+const retSel=()=>{const ids=[...document.querySelectorAll('.rsel:checked')].map(e=>+e.value);ids.length?ret(ids):alert('Tick the items to return first.')};
+async function ret(ids){const ls=ids.map(id=>S.loans.find(l=>l.id==id)).filter(Boolean),pins={};
+ for(const pid of [...new Set(ls.map(l=>l.perf_id))]){const p=pf(pid);if(p.has_pin){const x=await askPin('Enter the PIN for “'+p.name+'” to approve the return',1);if(x==null)return;pins[pid]=x}}
+ const t=$('#rdt');let at;if(t&&t.dataset.t&&t.value){const dd=new Date(t.value);if(isNaN(dd))return alert('Check the return date.');at=dd.toISOString()}
+ await act({a:'ret',pins,at,rows:ids.map(id=>({id,cond:$('#c'+id).value,note:$('#n'+id).value}))},'Returned ✓')}
+const KINDS=()=>U.sec=='other'?{members:'Members',other:'Items',perfs:'Performances'}:{members:'Members',costume:'Costumes',shirt:'Shirts',perfs:'Performances'};
+v.manage=()=>`<div class=seg>${Object.entries(KINDS()).map(([k,l])=>`<button class="${U.sub==k?'on':''}" onclick="U.sub='${k}';U.q='';U.sc='';U.mr='';render()">${l}</button>`).join('')}</div>
+<div class=card><div class=row style="flex-wrap:nowrap"><input placeholder="Search…" value="${esc(U.q)}" oninput="U.q=this.value;$('#lst').innerHTML=mlist()"><button class=btn onclick="openForm()">+ Add</button></div>
+${U.sub=='members'?`<select style="margin-top:10px" onchange="U.mr=this.value;$('#lst').innerHTML=mlist()"><option value="">All roles</option>${[...new Set(S.members.map(m=>m.role).filter(Boolean))].map(r=>`<option ${U.mr==r?'selected':''}>${esc(r)}</option>`).join('')}</select>`:''}${(U.sub=='costume'||U.sub=='shirt'||U.sub=='other')&&cats().length?`<select style="margin-top:10px" onchange="U.sc=this.value;$('#lst').innerHTML=mlist()"><option value="">All categories</option>${cats().map(c=>`<option ${U.sc==c?'selected':''}>${esc(c)}</option>`).join('')}</select>`:''}${U.sub=='perfs'?'':`<label class=chk><input type=checkbox ${U.arch?'checked':''} onchange="U.arch=this.checked?1:0;$('#lst').innerHTML=mlist()">Show ${U.sub=='members'?'inactive':'archived'}</label>`}
+<div id=lst style="margin-top:8px">${mlist()}</div></div>`;
+function mlist(){const q=U.q.toLowerCase(),s=U.sub;if(s=='other')return olist();let r;
+ if(s=='members')r=S.members.filter(m=>(U.arch||m.active)&&(!U.mr||m.role==U.mr)&&(m.name+(m.role||'')+(m.student_id||'')).toLowerCase().includes(q));
+ else if(s=='perfs')r=S.perfs.filter(p=>(p.name+p.date).toLowerCase().includes(q));
+ else r=S.items.filter(i=>i.kind==s&&(U.arch||!i.archived)&&(!U.sc||i.category==U.sc)&&(i.name+vl(i)).toLowerCase().includes(q));
+ const none='<p class=mut>Nothing yet. Tap “+ Add”.</p>';
+ if(s=='costume'||s=='shirt'){const g={};r.forEach(i=>(g[i.name]??=[]).push(i));
+  return Object.values(g).map(a=>`<div class=grp><div class=row style="justify-content:space-between;flex-wrap:nowrap"><div><b>${esc(a[0].name)}</b>${a[0].category?` <span class=pill>${esc(a[0].category)}</span>`:''}</div><button class="btn ghost sm" onclick="openGrp(${a[0].id})">+ Variation</button></div>`+a.map(x=>`<div class="li ${x.archived?'off':''}"><div class=g>${esc(vl(x))} ${x.archived?'<span class=pill>Archived</span>':''}${x.remarks?`<div class=sub>${esc(x.remarks)}</div>`:''}</div><b>× ${x.total}</b><button class="btn ghost sm" onclick="openForm(${x.id})">Edit</button></div>`).join('')+'</div>').join('')||none}
+ return r.map(x=>{const off=s=='members'?!x.active:0,sub=s=='members'?[x.role,x.student_id,x.wechat].filter(Boolean).join(' · '):x.date+' · '+S.loans.filter(l=>l.perf_id==x.id).length+' records · '+(x.has_pin?'🔒 PIN set':'⚠️ no PIN');
+  return `<div class="li ${off?'off':''}"><div class=g><b>${esc(x.name)}</b> ${off?'<span class=pill>Inactive</span>':''}<div class=sub>${esc(sub)}</div></div><button class="btn ghost sm" onclick="openForm(${x.id})">Edit</button></div>`}).join('')||none}
+/* OTHER ITEMS (instruments, drums, souvenirs…) */
+const olist=()=>{const q=U.q.toLowerCase(),g={};S.items.filter(i=>i.kind=='other'&&(U.arch||!i.archived)&&(!U.sc||i.category==U.sc)&&(i.name+vl(i)+(i.category||'')).toLowerCase().includes(q)).forEach(i=>(g[i.category||'Uncategorised']??=[]).push(i));
+ return Object.entries(g).map(([c,a])=>`<div class=grp><div class=row style="justify-content:space-between;flex-wrap:nowrap"><b>${esc(c)}</b><button class="btn ghost sm" onclick="openCat(${a[0].id})">+ Add here</button></div>`+a.map(x=>`<div class="li ${x.archived?'off':''}"><div class=g><b>${esc(x.name)}</b> ${esc(vl(x))} ${x.archived?'<span class=pill>Archived</span>':''}<div class=sub>${x.out} out · ${x.total-x.out} in store${x.remarks?' · '+esc(x.remarks):''}</div></div><input type=number min=0 style="width:76px;height:40px;text-align:center" value=${x.total} onchange="act({a:'save',t:'items',row:{...it(${x.id}),total:+this.value}},'Saved ✓')"><button class="btn ghost sm" onclick="openForm(${x.id})">Edit</button></div>`).join('')+'</div>').join('')||'<p class=mut>Nothing here yet. Tap “+ Add” to start, for example drums, sticks or souvenirs.</p>'};
+v.other=()=>{const t=S.items.filter(i=>!i.archived&&i.kind=='other'),sum=k=>t.reduce((a,i)=>a+i[k],0),tl=(l,n,c='')=>`<div class="tile ${c}"><div class=n>${n}</div><div class=l>${l}</div></div>`;
+ return `<div class=stats>${tl('Total pieces',sum('total'))}${tl('Out',sum('out'))}${tl('In store',sum('total')-sum('out'),'hl')}</div>
+<div class=card><div class=row style="flex-wrap:nowrap"><input placeholder="🔍 Search instruments, drums, souvenirs…" value="${esc(U.q)}" oninput="U.q=this.value;$('#lst').innerHTML=olist()"><button class=btn onclick="openForm()">+ Add</button></div>
+${cats().length?`<select style="margin-top:10px" onchange="U.sc=this.value;$('#lst').innerHTML=olist()"><option value="">All categories</option>${cats().map(c=>`<option ${U.sc==c?'selected':''}>${esc(c)}</option>`).join('')}</select>`:''}
+<label class=chk><input type=checkbox ${U.arch?'checked':''} onchange="U.arch=this.checked?1:0;$('#lst').innerHTML=olist()">Show archived</label><div id=lst style="margin-top:8px">${olist()}</div></div>`};
+const openCat=id=>openForm(0,{category:it(id).category||''});
+const openGrp=id=>{const i=it(id);openForm(0,{name:i.name,remarks:i.remarks||'',category:i.category||''})};
+const sizeRow=()=>'<div class=sz><input placeholder="Size"><input placeholder="Colour"><input type=number min=0 placeholder="Qty"><button class="btn ghost sm" onclick="this.parentNode.remove()">✕</button></div>';
+const addSize=()=>{$('#szs').insertAdjacentHTML('beforeend',sizeRow())};
+function openForm(id,pre){const s=U.sub,t=s=='members'?'members':s=='perfs'?'perfs':'items',row=id?{...(t=='members'?mb(id):t=='perfs'?pf(id):it(id))}:(s=='perfs'?{date:today()}:pre||{});U.edit={t,row,s};
+ const fd=(k,l,ty='text',x='')=>`<div><label class=f>${l}</label><input id=m_${k} type=${ty} value="${esc(row[k])}" ${x}></div>`;
+ const pinf=(l,i,ph='')=>`<div><label class=f>${l}</label><input id=${i} type=password inputmode=numeric autocomplete=new-password placeholder="${ph}"></div>`;
+ const nm=s=='shirt'?'Name / design *':s=='other'?'Item name *':'Name *',cf=fd('category','Category','text','list=cats placeholder="e.g. Top, Under layer, Skirt, Accessory"')+`<datalist id=cats>${cats(s=='other'?'o':'c').map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
+ const fl=t=='members'?fd('name','Name *')+fd('student_id','Student ID 学号')+fd('wechat','WeChat')+fd('role','Role','text','list=roles placeholder="drummer, committee…"')+'<datalist id=roles><option>drummer<option>committee</datalist>'
+  :t=='perfs'?fd('name','Performance name *')+fd('date','Date','date')+(id?(row.has_pin?pinf('Current PIN (only needed to change it)','m_oldpin')+pinf('New PIN, 4–8 digits (leave blank to keep)','m_pin'):pinf('Set a return PIN (4–8 digits)','m_pin','Not set yet')):pinf('Return PIN * (4–8 digits)','m_pin','Needed to approve returns'))
+  :id?fd('name',nm)+cf+fd('color','Colour (optional)')+fd('size','Size (blank = One size)')+fd('total','Total quantity','number','min=0')+fd('remarks','Remarks')
+  :fd('name',nm)+cf+fd('remarks','Remarks (optional)')+`<div><label class=f>Variations and quantities (size and/or colour; leave size blank for One size)</label><div id=szs class=form>${sizeRow()}</div><button class="btn ghost sm" style="margin-top:10px" onclick=addSize()>+ Add another variation</button></div>`;
+ const off=t=='members'?!row.active:row.archived,label={members:'member',perfs:'performance',costume:'costume',shirt:'shirt',other:'item'}[s];
+ $('#modal').innerHTML=`<div class=ov onclick="if(event.target==this)closeM()"><div class=md><h3>${id?'Edit':'Add'} ${label}</h3><div class=form>${fl}</div>
+<div class=row style="margin-top:20px"><button class=btn onclick="saveForm(0)">Save</button>${id?'':'<button class="btn ghost" onclick="saveForm(1)">Save &amp; add another</button>'}<button class="btn ghost" onclick=closeM()>Cancel</button></div>
+${id?`<div class=row style="margin-top:16px;padding-top:16px;border-top:1px solid var(--ln)">${t=='perfs'?'':`<button class="btn ghost sm" onclick=flip()>${off?'Restore':t=='members'?'Make inactive':'Archive'}</button>`}<button class="btn bad sm" onclick=delRow()>Delete</button></div>`:''}</div></div>`;
+ setTimeout(()=>{const e=$('#m_name');e&&(!id&&!(pre&&pre.name))&&e.focus()},60)}
+const closeM=()=>$('#modal').innerHTML='';
+async function saveForm(again){const {t,row,s}=U.edit,r={...row},isNew=!row.id;
+ ['name','student_id','wechat','role','date','size','total','remarks','category','color'].forEach(k=>{const e=$('#m_'+k);if(e)r[k]=e.type=='number'?Number(e.value):e.value.trim()});
+ if(!r.name)return alert('Name is required.');if(t=='perfs'&&!r.date)return alert('Date is required.');
+ if(t=='items'&&(!Number.isSafeInteger(r.total)||r.total<0))return alert('Total quantity must be a whole number of zero or more.');
+ if(t=='items'&&!isNew&&r.total<(Number(row.out)||0))return alert('Total quantity cannot be lower than the number of items currently checked out.');
+ if(t=='perfs'){const pin=(($('#m_pin')||{}).value||'').trim(),old=(($('#m_oldpin')||{}).value||'').trim();
+  if((isNew||pin)&&!/^\d{4,8}$/.test(pin))return alert('The PIN must be 4 to 8 digits.');
+  const res=await act({a:'save',t,row:r,pin},'Saved ✓');if(res.err)return;
+  if(isNew&&res.id){U.perf=res.id;localStorage.perf=res.id}
+  if(!isNew&&pin){const x=await act({a:'perf_pin',id:row.id,old,new:pin},'PIN changed ✓');if(x.err)return}
+  render();closeM();if(again)openForm();return}
+ if(t=='items'&&isNew){
+  const rows=[...document.querySelectorAll('#szs .sz')].map(d=>{const i=d.querySelectorAll('input');return{size:i[0].value.trim(),color:i[1].value.trim(),qty:i[2].value}}).filter(x=>x.size||x.color||x.qty!=='');
+  if(!rows.length)return alert('Enter at least one variation with a quantity (leave size blank for "One size").');
+  for(const x of rows){const sz=x.size||'One size';if(S.items.some(i=>!i.archived&&i.kind==s&&i.name==r.name&&i.size==sz&&(i.color||'')==x.color))return alert(r.name+' · '+[x.color,sz].filter(Boolean).join(' · ')+' already exists. Close this and tap Edit on it instead.')}
+  for(const x of rows)await api({a:'save',t:'items',row:{name:r.name,category:r.category||'',remarks:r.remarks||'',kind:s,size:x.size||'One size',color:x.color,total:+x.qty||0,archived:0}});
+  await load();toast('Saved ✓');closeM();if(again)openForm();return}
+ if(t=='members')r.active??=1;else if(t=='items'){r.archived??=0;r.kind=row.kind||s;r.size=r.size||'One size'}
+ if(t=='items'&&!isNew&&(row.category||'')!==(r.category||'')){for(const x of S.items.filter(i=>i.kind==row.kind&&i.name==row.name&&i.id!=row.id))await api({a:'save',t:'items',row:{...x,category:r.category||''}})}
+ await act({a:'save',t,row:r},'Saved ✓');
+ closeM();if(again)openForm()}
+async function flip(){const {t,row}=U.edit,r={...row};t=='members'?r.active=r.active?0:1:r.archived=r.archived?0:1;closeM();await act({a:'save',t,row:r},'Updated ✓')}
+async function delRow(){const {t,row}=U.edit;if(!confirm('Delete “'+row.name+'”? If it has records, it will be archived instead.'))return;closeM();await act({a:'del',t,id:row.id})}
+/* REPORTS */
+const recList=()=>{const r=SL().filter(l=>(!U.rp||l.perf_id==U.rp)&&(!U.rm||l.member_id==U.rm)&&(!U.rs||(U.rs=='out')==!l.returned_at));
+ return `<p class=mut>${r.length} record(s)</p>`+r.slice(0,100).map(l=>`<div class=li><div class=g><b>${esc(mb(l.member_id).name)}</b> · ${esc(lab(it(l.item_id)))} × ${l.qty}<div class=sub>${esc(pf(l.perf_id).name)} · out ${T(l.out_at)}${l.returned_at?' · back '+T(l.returned_at)+' · '+esc(l.cond||''):''}${l.out_note||l.ret_note?' · '+esc([l.out_note,l.ret_note].filter(Boolean).join(' / ')):''}</div></div><span class="pill ${l.returned_at?'ok':''}">${l.returned_at?'Returned':'Out'}</span></div>`).join('')+(r.length>100?'<p class=mut>Showing the newest 100. Narrow the filters, or download Excel for everything.</p>':'')};
+const loadX=()=>new Promise(r=>{const e=document.createElement('script');e.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';e.onload=()=>r(1);e.onerror=()=>r(0);document.head.appendChild(e)});
+v.rep=()=>`<div class=card><h3>Records</h3><div class=grid>
+<div><label class=f>Performance</label><select onchange="U.rp=this.value;$('#rec').innerHTML=recList()"><option value="">All</option>${perfOpts(U.rp)}</select></div>
+<div><label class=f>Member</label><select onchange="U.rm=this.value;$('#rec').innerHTML=recList()"><option value="">All</option>${S.members.map(m=>`<option value=${m.id} ${U.rm==m.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select></div>
+<div><label class=f>Status</label><select onchange="U.rs=this.value;$('#rec').innerHTML=recList()"><option value="">All</option><option value=out ${U.rs=='out'?'selected':''}>Still out</option><option value=back ${U.rs=='back'?'selected':''}>Returned</option></select></div></div><div id=rec style="margin-top:12px">${recList()}</div></div>
+`+`<div class=card><h3>Excel report — ${U.sec=='other'?'instruments &amp; others':'clothes'}</h3><p class=mut>Stock, items currently out, performance records and members for this section.</p><button class=btn onclick=xl()>Download Excel report</button></div>
+<div class=card><h3>Backup</h3><p class=mut>Download a backup regularly and keep it somewhere safe.</p><button class=btn onclick=bk()>Download full backup</button>
+<h3 style="margin-top:24px">Restore</h3><p class=mut>Replaces ALL current data with the backup file.</p><input type=file accept=.json onchange=rs(this)></div>`;
+async function xl(){if(!window.XLSX&&!await loadX())return alert('Could not load the Excel library. Check your connection.');const w=XLSX.utils.book_new(),add=(n,a)=>XLSX.utils.book_append_sheet(w,XLSX.utils.json_to_sheet(a),n),kn=i=>({Type:i.kind,Category:i.category||'',Name:i.name,Colour:i.color||'',Size:i.size});
+ add('In store now',S.items.filter(i=>!i.archived&&inSec(i)).map(i=>({...kn(i),Total:i.total,Out:i.out,'In store':i.total-i.out})));
+ const L=l=>({Performance:pf(l.perf_id).name,Member:mb(l.member_id).name,...kn(it(l.item_id)),Quantity:l.qty,'Check-out time':T(l.out_at),'Check-out remarks':l.out_note});
+ add('Currently out',SL().filter(l=>!l.returned_at).map(L));
+ add('Performance records',SL().map(l=>({...L(l),'Return time':l.returned_at?T(l.returned_at):'','Return condition':l.cond||'','Return remarks':l.ret_note||'',Status:l.returned_at?'Returned':'Out'})));
+ add('Members',S.members.map(m=>({Name:m.name,Role:m.role,Status:m.active?'Active':'Inactive'})));
+ XLSX.writeFile(w,`${U.sec=='other'?'others':'clothes'}-inventory-${today()}.xlsx`)}
+async function bk(){const r=await fetch('/api?backup=1',{cache:'no-store',headers:{'x-pass':P}});if(!r.ok)return alert('Could not make the backup. Try again.');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([await r.text()],{type:'application/json'}));a.download=`backup-${today()}.json`;a.click()}
+async function rs(el){const f=el.files[0];if(f&&confirm('This REPLACES all current data with the backup. Continue?'))await act({a:'restore',data:JSON.parse(await f.text())},'Restored ✓')}
+if(L=='zh'){document.documentElement.lang='zh-CN';document.title='THU24FD 电子库存';tx(document.body)}
+load();
+</script></body></html>
