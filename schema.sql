@@ -10,11 +10,3 @@ INSERT INTO items(kind,name,size,total,category) VALUES
 ('costume','黑色无袖表演服','2XL',1,'Sleeveless top'),
 ('costume','黑色长裙','M',16,'Skirt'),('costume','黑色长裙','L',7,'Skirt'),('costume','黑色长裙','XL',4,'Skirt'),('costume','黑色长裙','2XL',1,'Skirt'),('costume','黑色长裙','3XL',1,'Skirt'),
 ('costume','红色彩带','One size',15,'Accessory');
-
--- Query-performance indexes for inventory totals, open loans and report filters.
-CREATE INDEX IF NOT EXISTS idx_loans_item_returned ON loans(item_id, returned_at);
-CREATE INDEX IF NOT EXISTS idx_loans_perf_id ON loans(perf_id, id);
-CREATE INDEX IF NOT EXISTS idx_loans_member_id ON loans(member_id, id);
-CREATE INDEX IF NOT EXISTS idx_loans_open_returned ON loans(returned_at, id);
-CREATE INDEX IF NOT EXISTS idx_items_kind_archived_name ON items(kind, archived, name);
-CREATE INDEX IF NOT EXISTS idx_perfs_date_id ON perfs(date DESC, id DESC);
