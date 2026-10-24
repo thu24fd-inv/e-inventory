@@ -62,11 +62,13 @@ async function main({request,env}){
   }else if(a=='out'){
     const qty=Number(d.qty),perf=Number(d.perf_id),member=Number(d.member_id),item=Number(d.item_id);
     if(!Number.isSafeInteger(qty)||qty<1||![perf,member,item].every(Number.isSafeInteger))return J({err:'Choose a valid performance, member, item and positive whole-number quantity.'},409);
+    const t0=d.at?Date.parse(d.at):Date.now();
+    if(isNaN(t0)||t0>Date.now()+5*60000)return J({err:'The check-out time is invalid or in the future. Check the date.'},409);
     const r=await db.prepare(`INSERT INTO loans(perf_id,member_id,item_id,qty,out_at,out_note)
       SELECT p.id,m.id,i.id,?,?,? FROM perfs p JOIN members m ON m.id=? AND m.active=1
       JOIN items i ON i.id=? AND i.archived=0
       WHERE p.id=? AND i.total-(SELECT coalesce(sum(qty),0) FROM loans WHERE item_id=i.id AND returned_at IS NULL)>=?`)
-      .bind(qty,new Date().toISOString(),String(d.note||'').slice(0,1000),member,item,perf,qty).run();
+      .bind(qty,new Date(t0).toISOString(),String(d.note||'').slice(0,1000),member,item,perf,qty).run();
     if(!r.meta.changes)return J({err:'Checkout could not be recorded. Check that the performance, active member and item exist and enough stock is available.'},409);
   }else if(a=='ret'){
     const rows=Array.isArray(d.rows)?d.rows:[];
