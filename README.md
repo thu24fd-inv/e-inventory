@@ -52,3 +52,5 @@ Give the next committee the club email login. Keep recovery phone numbers / back
 - Items have Category, Size and Colour. Each performance has a return PIN (set when adding it). Returns need that PIN; deleting check-out records needs the site password.
 - The database upgrades itself the first time the new version runs. No SQL needed.
 - Old performances have no PIN: open Setup > Performances > Edit to set one.
+- NEW tab "📝 Plan": draft who takes what for a performance BEFORE giving anything out. Stock is only checked, never changed, until you press "Check out" (per person or "Check out all"). The stock check shows needed vs in store and flags shortages; "Copy list" gives a text list to paste into the WeChat group.
+- The database adds the new "plans" table by itself on first run. To update: upload the new functions/api.js and public/index.html (same names replace the old ones).

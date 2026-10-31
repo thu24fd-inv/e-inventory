@@ -1,6 +1,7 @@
 CREATE TABLE members(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,student_id TEXT,wechat TEXT,role TEXT,active INTEGER DEFAULT 1);
 CREATE TABLE items(id INTEGER PRIMARY KEY AUTOINCREMENT,kind TEXT NOT NULL,name TEXT NOT NULL,size TEXT,total INTEGER DEFAULT 0,remarks TEXT,archived INTEGER DEFAULT 0,category TEXT,color TEXT);
 CREATE TABLE perfs(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,date TEXT NOT NULL,pin TEXT);
+CREATE TABLE plans(id INTEGER PRIMARY KEY AUTOINCREMENT,perf_id INTEGER,member_id INTEGER,item_id INTEGER,qty INTEGER,note TEXT,created_at TEXT);
 CREATE TABLE loans(id INTEGER PRIMARY KEY AUTOINCREMENT,perf_id INTEGER,member_id INTEGER,item_id INTEGER,qty INTEGER,out_at TEXT,out_note TEXT,returned_at TEXT,cond TEXT,ret_note TEXT);
 INSERT INTO items(kind,name,size,total,category) VALUES
 ('costume','红色有袖表演服','M',7,'Sleeved top'),('costume','红色有袖表演服','L',3,'Sleeved top'),('costume','红色有袖表演服','XL',4,'Sleeved top'),('costume','红色有袖表演服','2XL',2,'Sleeved top'),('costume','红色有袖表演服','5XL',1,'Sleeved top'),
@@ -18,3 +19,4 @@ CREATE INDEX IF NOT EXISTS idx_loans_member_id ON loans(member_id, id);
 CREATE INDEX IF NOT EXISTS idx_loans_open_returned ON loans(returned_at, id);
 CREATE INDEX IF NOT EXISTS idx_items_kind_archived_name ON items(kind, archived, name);
 CREATE INDEX IF NOT EXISTS idx_perfs_date_id ON perfs(date DESC, id DESC);
+CREATE INDEX IF NOT EXISTS idx_plans_perf ON plans(perf_id, member_id);
