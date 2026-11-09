@@ -1,4 +1,4 @@
-const C={members:'id,name,student_id,wechat,role,active',items:'id,kind,name,size,total,remarks,archived,category,color',perfs:'id,name,date,pin',loans:'id,perf_id,member_id,item_id,qty,out_at,out_note,returned_at,cond,ret_note',plans:'id,perf_id,member_id,item_id,qty,note,created_at'};
+const C={members:'id,name,student_id,wechat,role,active',items:'id,kind,name,size,total,remarks,archived,category,color,part',perfs:'id,name,date,pin',loans:'id,perf_id,member_id,item_id,qty,out_at,out_note,returned_at,cond,ret_note',plans:'id,perf_id,member_id,item_id,qty,note,created_at'};
 const ins=(db,t,r)=>{const c=C[t].split(',');return db.prepare(`INSERT OR REPLACE INTO ${t}(${C[t]}) VALUES(${c.map(()=>'?')})`).bind(...c.map(k=>r[k]??null))};
 const hash=async p=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode('thu24fd:'+p)))].map(b=>b.toString(16).padStart(2,'0')).join('');
 const okPin=p=>/^\d{4,8}$/.test(String(p||''));
@@ -14,6 +14,7 @@ async function main({request,env}){
     if(!await has('items','category')){await db.prepare('ALTER TABLE items ADD COLUMN category TEXT').run();
       await db.prepare("UPDATE items SET category=CASE WHEN name LIKE '%有袖%' THEN 'Sleeved top' WHEN name LIKE '%无袖%' THEN 'Sleeveless top' WHEN name LIKE '%裙%' THEN 'Skirt' WHEN name LIKE '%彩带%' THEN 'Accessory' END WHERE kind='costume' AND category IS NULL").run()}
     if(!await has('items','color'))await db.prepare('ALTER TABLE items ADD COLUMN color TEXT').run();
+    if(!await has('items','part'))await db.prepare('ALTER TABLE items ADD COLUMN part TEXT').run();
     if(!await has('perfs','pin'))await db.prepare('ALTER TABLE perfs ADD COLUMN pin TEXT').run();
     migrated=1}catch(e){}}
   if(request.method==='GET'){
@@ -73,6 +74,29 @@ async function main({request,env}){
       WHERE p.id=? AND i.total-(SELECT coalesce(sum(qty),0) FROM loans WHERE item_id=i.id AND returned_at IS NULL)>=?`)
       .bind(qty,new Date(t0).toISOString(),String(d.note||'').slice(0,1000),member,item,perf,qty).run();
     if(!r.meta.changes)return J({err:'Checkout could not be recorded. Check that the performance, active member and item exist and enough stock is available.'},409);
+  }else if(a=='out_many'){
+    // One person, several parts of a set (e.g. top + pants), each its own item/size. All-or-nothing.
+    const qty=Number(d.qty),perf=Number(d.perf_id),member=Number(d.member_id),ids=[...new Set((Array.isArray(d.items)?d.items:[]).map(Number))];
+    if(!Number.isSafeInteger(qty)||qty<1||!Number.isSafeInteger(perf)||!Number.isSafeInteger(member)||!ids.length||ids.length>10||ids.some(n=>!Number.isSafeInteger(n)))return J({err:'Choose a valid performance, member, item and positive whole-number quantity.'},409);
+    const t0=d.at?Date.parse(d.at):Date.now();
+    if(isNaN(t0)||t0>Date.now()+5*60000)return J({err:'The check-out time is invalid or in the future. Check the date.'},409);
+    const ph=ids.map(()=>'?').join(',');
+    const rows=(await db.prepare(`SELECT i.id,i.name,i.size,i.color,i.part,i.archived,
+      i.total-(SELECT coalesce(sum(qty),0) FROM loans WHERE item_id=i.id AND returned_at IS NULL) av FROM items i WHERE i.id IN (${ph})`).bind(...ids).all()).results;
+    if(rows.length!==ids.length||rows.some(r=>r.archived))return J({err:'Checkout could not be recorded. Check that the performance, active member and item exist and enough stock is available.'},409);
+    const short=rows.filter(r=>r.av<qty);
+    if(short.length)return J({err:'Not enough stock for: '+short.map(r=>[r.name,r.part,r.color,r.size].filter(Boolean).join(' · ')+' (need '+qty+', '+Math.max(r.av,0)+' in store)').join('; ')+'. Nothing was checked out.'},409);
+    const at=new Date(t0).toISOString(),note=String(d.note||'').slice(0,1000);
+    const res=await db.batch(ids.map(id=>db.prepare(`INSERT INTO loans(perf_id,member_id,item_id,qty,out_at,out_note)
+      SELECT p.id,m.id,i.id,?,?,? FROM perfs p JOIN members m ON m.id=? AND m.active=1
+      JOIN items i ON i.id=? AND i.archived=0
+      WHERE p.id=? AND i.total-(SELECT coalesce(sum(qty),0) FROM loans WHERE item_id=i.id AND returned_at IS NULL)>=?`)
+      .bind(qty,at,note,member,id,perf,qty)));
+    if(res.some(r=>!r.meta.changes)){
+      const done=res.filter(r=>r.meta.changes).map(r=>r.meta.last_row_id);
+      if(done.length)await db.batch(done.map(id=>db.prepare('DELETE FROM loans WHERE id=?').bind(id)));
+      return J({err:'Checkout could not be recorded. Check that the performance, active member and item exist and enough stock is available.'},409);
+    }
   }else if(a=='ret'){
     const rows=Array.isArray(d.rows)?d.rows:[];
     const ids=rows.map(r=>Number(r&&r.id));
@@ -120,14 +144,14 @@ async function main({request,env}){
     const t0=d.at?Date.parse(d.at):Date.now();
     if(isNaN(t0)||t0>Date.now()+5*60000)return J({err:'The check-out time is invalid or in the future. Check the date.'},409);
     const ph=ids.map(()=>'?').join(',');
-    const rows=(await db.prepare(`SELECT pl.id,pl.item_id,pl.qty,m.active ma,i.archived ia,i.name,i.size,i.color,
+    const rows=(await db.prepare(`SELECT pl.id,pl.item_id,pl.qty,m.active ma,i.archived ia,i.name,i.size,i.color,i.part,
       i.total-(SELECT coalesce(sum(qty),0) FROM loans WHERE item_id=i.id AND returned_at IS NULL) av
       FROM plans pl JOIN members m ON m.id=pl.member_id JOIN items i ON i.id=pl.item_id WHERE pl.id IN (${ph})`).bind(...ids).all()).results;
     if(rows.length!==ids.length)return J({err:'Some plan records no longer exist. Refresh and try again.'},409);
     if(rows.some(r=>!r.ma||r.ia))return J({err:'A planned member is inactive or a planned item is archived. Remove it from the plan first.'},409);
     const need={};rows.forEach(r=>{need[r.item_id]=(need[r.item_id]||0)+r.qty});
     const short=[...new Map(rows.filter(r=>need[r.item_id]>r.av).map(r=>[r.item_id,r])).values()];
-    if(short.length)return J({err:'Not enough stock for: '+short.map(r=>[r.name,r.color,r.size].filter(Boolean).join(' · ')+' (need '+need[r.item_id]+', '+Math.max(r.av,0)+' in store)').join('; ')+'. Nothing was checked out.'},409);
+    if(short.length)return J({err:'Not enough stock for: '+short.map(r=>[r.name,r.part,r.color,r.size].filter(Boolean).join(' · ')+' (need '+need[r.item_id]+', '+Math.max(r.av,0)+' in store)').join('; ')+'. Nothing was checked out.'},409);
     const at=new Date(t0).toISOString();
     await db.batch(rows.flatMap(r=>[
       db.prepare(`INSERT INTO loans(perf_id,member_id,item_id,qty,out_at,out_note)
