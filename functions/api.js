@@ -1,4 +1,4 @@
-const C={members:'id,name,student_id,wechat,role,active',items:'id,kind,name,size,total,remarks,archived,category,color,part',perfs:'id,name,date,pin',loans:'id,perf_id,member_id,item_id,qty,out_at,out_note,returned_at,cond,ret_note',plans:'id,perf_id,member_id,item_id,qty,note,created_at'};
+const C={members:'id,name,student_id,wechat,role,active',items:'id,kind,name,size,total,remarks,archived,category,color,part,all_parts,set_name',perfs:'id,name,date,pin',loans:'id,perf_id,member_id,item_id,qty,out_at,out_note,returned_at,cond,ret_note',plans:'id,perf_id,member_id,item_id,qty,note,created_at'};
 const ins=(db,t,r)=>{const c=C[t].split(',');return db.prepare(`INSERT OR REPLACE INTO ${t}(${C[t]}) VALUES(${c.map(()=>'?')})`).bind(...c.map(k=>r[k]??null))};
 const hash=async p=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode('thu24fd:'+p)))].map(b=>b.toString(16).padStart(2,'0')).join('');
 const okPin=p=>/^\d{4,8}$/.test(String(p||''));
@@ -15,6 +15,11 @@ async function main({request,env}){
       await db.prepare("UPDATE items SET category=CASE WHEN name LIKE '%有袖%' THEN 'Sleeved top' WHEN name LIKE '%无袖%' THEN 'Sleeveless top' WHEN name LIKE '%裙%' THEN 'Skirt' WHEN name LIKE '%彩带%' THEN 'Accessory' END WHERE kind='costume' AND category IS NULL").run()}
     if(!await has('items','color'))await db.prepare('ALTER TABLE items ADD COLUMN color TEXT').run();
     if(!await has('items','part'))await db.prepare('ALTER TABLE items ADD COLUMN part TEXT').run();
+    if(!await has('items','all_parts'))await db.prepare('ALTER TABLE items ADD COLUMN all_parts INTEGER DEFAULT 0').run();
+    if(!await has('items','set_name')){await db.prepare('ALTER TABLE items ADD COLUMN set_name TEXT').run();
+      // one-time: costumes in the 共鸣 (Gongming) category become one set (tops + ribbon; pants are added in Setup)
+      const gm="kind='costume' AND (category='共鸣' OR name IN ('红色有袖表演服','红色有袖表演服（新）','红色无袖表演服','红色彩带'))";
+      await db.prepare(`UPDATE items SET set_name='共鸣 Gongming',part=CASE WHEN name LIKE '%彩带%' THEN 'Ribbon' ELSE 'Top' END,all_parts=CASE WHEN name LIKE '%彩带%' THEN 0 ELSE 1 END WHERE ${gm}`).run()}
     if(!await has('perfs','pin'))await db.prepare('ALTER TABLE perfs ADD COLUMN pin TEXT').run();
     migrated=1}catch(e){}}
   if(request.method==='GET'){

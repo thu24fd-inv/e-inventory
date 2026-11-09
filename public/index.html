@@ -106,15 +106,15 @@ const ZH={'📝 Plan':'📝 预分配','Planned pieces':'预分配件数','Peopl
 'Create a performance first (tap + New).':'请先创建演出（点击“+ 新建”）。','Choose a member.':'请选择成员。','Choose an item.':'请选择物品。','Tick the records to delete first.':'请先勾选要删除的记录。','Tick the items to return first.':'请先勾选要归还的物品。','Check the return date.':'请检查归还日期。','Name is required.':'名称不能为空。','Date is required.':'日期不能为空。','The PIN must be 4 to 8 digits.':'PIN必须是4–8位数字。','Enter at least one variation with a quantity (leave size blank for "One size").':'请至少输入一个款式及数量（尺码留空表示均码）。',
 'This REPLACES all current data with the backup. Continue?':'这将用备份替换全部现有数据，是否继续？','No connection. Please try again.':'网络连接失败，请重试。','Password':'密码','Up to date ✓':'已是最新 ✓','Could not load the Excel library. Check your connection.':'无法加载Excel组件，请检查网络。','Could not make the backup. Try again.':'无法生成备份，请重试。',
 'Not enough in store (someone may have just taken it).':'库存不足（可能刚被别人借走）。','The return time is earlier than the check-out time. Check the date.':'归还时间早于借出时间，请检查日期。','Wrong password. Nothing was deleted.':'密码错误，未删除任何内容。','The current PIN is wrong. PIN not changed.':'当前PIN错误，PIN未修改。','The new PIN must be 4 to 8 digits.':'新PIN必须是4–8位数字。','Enter a PIN of 4 to 8 digits.':'请输入4–8位数字的PIN。','It has records, so it was archived / made inactive instead of deleted.':'该项已有记录，因此改为归档／停用，未删除。','This performance has records, so it cannot be deleted.':'该演出已有记录，无法删除。',
-'Part (optional)':'部件（可选）','Top, Pants… leave blank for one-piece':'上衣、裤子……单件款请留空','Top size':'上衣尺码','Pants size':'裤子尺码','Top':'上衣','Pants':'裤子','None (skip)':'不需要（跳过）','Quantity applies to each part you choose.':'数量适用于所选的每个部件。','Choose at least one size for this set.':'请至少为此套装选择一个尺码。','+ Part':'+ 部件'};
-const RX=[[/^(.*) — set \((.*)\)$/,m=>m[1]+' — 套装（'+m[2].replace(/Top/g,'上衣').replace(/Pants/g,'裤子')+'）'],[/^⚠️ (\d+) item\(s\) not enough in store$/,'⚠️ $1 项库存不足'],[/^Short by (\d+)$/,'缺 $1'],[/^\+(\d+) in other drafts$/,'另有 $1 件在其他草稿中'],[/^(\d+) piece\(s\)$/,'$1 件'],[/^(\d+) in store$/,'在库 $1'],[/^Check out all \((\d+)\)$/,'全部借出 ($1)'],[/^Check out (\d+) planned item\(s\)\? Stock will be reduced now\.$/,'确定借出 $1 项预分配物品？库存将立即减少。'],[/^Remove all (\d+) planned record\(s\)\?$/,'确定移除全部 $1 条预分配记录？'],[/^Not enough stock for: (.*)\. Nothing was checked out\.$/,'库存不足：$1。未借出任何物品。'],[/^Return selected \((\d+)\)$/,'退还所选 ($1)'],[/^Select all \((\d+)\)$/,'全选 ($1)'],[/^(\d+) record\(s\)$/,'$1 条记录'],[/^Delete (\d+) record\(s\)\? This cannot be undone\.$/,'确定删除 $1 条记录？此操作无法撤销。'],
+'Part (optional)':'部件（可选）','Top, Pants… leave blank for one-piece':'上衣、裤子……单件款请留空','Top size':'上衣尺码','Pants size':'裤子尺码','Top':'上衣','Pants':'裤子','None (skip)':'不需要（跳过）','Quantity applies to each part you choose.':'数量适用于所选的每个部件。','Choose at least one size for this set.':'请至少为此套装选择一个尺码。','+ Part':'+ 部件','Required in the set (cannot be skipped)':'套装必领（不可跳过）','Set name (optional)':'套装名称（可选）','e.g. 共鸣 Gongming — items given together':'例如：共鸣 Gongming——一起发放的物品','Ribbon size':'彩带尺码','Top, Pants, Ribbon… blank = one-piece':'上衣、裤子、彩带……单件款请留空','Choose size…':'选择尺码…','Quantity applies to each part.':'数量适用于每个部件。','Choose a size for every part of this set.':'请为此套装的每个部件选择尺码。'};
+const RX=[[/^(.*) — set \((.*)\)$/,m=>m[1]+' — 套装（'+m[2].replace(/Top/g,'上衣').replace(/Pants/g,'裤子').replace(/Ribbon/g,'彩带')+'）'],[/^⚠️ (\d+) item\(s\) not enough in store$/,'⚠️ $1 项库存不足'],[/^Short by (\d+)$/,'缺 $1'],[/^\+(\d+) in other drafts$/,'另有 $1 件在其他草稿中'],[/^(\d+) piece\(s\)$/,'$1 件'],[/^(\d+) in store$/,'在库 $1'],[/^Check out all \((\d+)\)$/,'全部借出 ($1)'],[/^Check out (\d+) planned item\(s\)\? Stock will be reduced now\.$/,'确定借出 $1 项预分配物品？库存将立即减少。'],[/^Remove all (\d+) planned record\(s\)\?$/,'确定移除全部 $1 条预分配记录？'],[/^Not enough stock for: (.*)\. Nothing was checked out\.$/,'库存不足：$1。未借出任何物品。'],[/^Return selected \((\d+)\)$/,'退还所选 ($1)'],[/^Select all \((\d+)\)$/,'全选 ($1)'],[/^(\d+) record\(s\)$/,'$1 条记录'],[/^Delete (\d+) record\(s\)\? This cannot be undone\.$/,'确定删除 $1 条记录？此操作无法撤销。'],
 [/^(Add|Edit) (member|performance|costume|shirt|item)$/,m=>(m[1]=='Add'?'添加':'编辑')+{member:'成员',performance:'演出',costume:'表演服',shirt:'队服',item:'物品'}[m[2]]],
 [/^Show (inactive|archived)$/,m=>m[1]=='inactive'?'显示已停用':'显示已归档'],[/^Excel report — (.*)$/,m=>'Excel 报表 — '+(m[1]=='clothes'?'服装':'乐器及其他')],
 [/^(\d+) out · (\d+) in store(.*)$/,'借出 $1 · 在库 $2$3'],[/^Enter the PIN for “(.*)” to approve the return$/,'请输入“$1”的PIN以批准归还'],
 [/^Wrong PIN for “(.*)”\. Nothing was recorded\..*$/,'“$1”的PIN错误，未记录任何内容。只有持有PIN的人才能批准归还。'],[/^Delete “(.*)”\? If it has records, it will be archived instead\.$/,'删除“$1”？如果已有记录，将改为归档。'],
 [/^(.*) already exists\. Close this and tap Edit on it instead\.$/,'$1 已存在。请关闭此窗口，改为点击其“编辑”。'],[/^Server error: (.*)$/,'服务器错误：$1'],
 [/^(.*) · (\d+) records · (🔒 PIN set|⚠️ no PIN)$/,m=>m[1]+' · '+m[2]+' 条记录 · '+(m[3].startsWith('🔒')?'🔒 已设PIN':'⚠️ 未设PIN')]];
-const INL=[[/ — (\d+) left\b/g,' — 剩余 $1'],[/\bOne size\b/g,'均码'],[/\bTop\b/g,'上衣'],[/\bPants\b/g,'裤子']],has=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
+const INL=[[/ — (\d+) left\b/g,' — 剩余 $1'],[/\bOne size\b/g,'均码'],[/\bTop\b/g,'上衣'],[/\bPants\b/g,'裤子'],[/\bRibbon\b/g,'彩带']],has=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
 const trz=s=>{if(L!='zh'||typeof s!='string')return s;const k=s.trim();if(!k)return s;if(has(ZH,k))return s.replace(k,()=>ZH[k]);for(const [re,f] of RX){const m=k.match(re);if(m)return s.replace(k,()=>typeof f=='function'?f(m):k.replace(re,f))}return INL.reduce((a,[re,r])=>a.replace(re,r),s)};
 const AT=['placeholder','label','title','aria-label'];
 function txNode(n){if(n.nodeType==3){const p=n.parentNode;if(p&&/^(SCRIPT|STYLE)$/.test(p.nodeName))return;if(n.__en===undefined)n.__en=n.nodeValue;const v=L=='zh'?trz(n.__en):n.__en;if(n.nodeValue!==v)n.nodeValue=v}
@@ -148,19 +148,20 @@ const partSort=(a,b)=>{const x=PORD.indexOf(a),y=PORD.indexOf(b);return (x<0?99:
 const szCmp=(a,b)=>{const x=SZO.indexOf(a.size),y=SZO.indexOf(b.size);return (x<0?99:x)-(y<0?99:y)||String(a.size||'').localeCompare(String(b.size||''),undefined,{numeric:true})||String(a.color||'').localeCompare(String(b.color||''))};
 const byPart=(x,y)=>(x.part?0:1)-(y.part?0:1)||partSort(x.part||'',y.part||'')||szCmp(x,y);
 const isSetVal=v=>String(v||'').startsWith('set:'),setBase=v=>+String(v).slice(4);
-const grpItems=id=>{const b=it(id);return b.id?S.items.filter(i=>i.kind==b.kind&&i.name==b.name&&i.part&&!i.archived):[]};
-const partIds=(v,z)=>{const g=grpItems(setBase(v));return [...new Set(g.map(x=>x.part))].map(p=>z[p]).filter(x=>x&&g.some(y=>y.id==x)).map(Number)};
+const gk=i=>i.set_name||i.name;
+const grpItems=id=>{const b=it(id);return b.id?S.items.filter(i=>i.kind==b.kind&&gk(i)==gk(b)&&i.part&&!i.archived):[]};
+const reqMissing=(v,z)=>{const g=grpItems(setBase(v));return [...new Set(g.filter(x=>+x.all_parts).map(x=>x.part))].some(p=>!z[p]||!g.some(y=>y.id==z[p]))},partIds=(v,z)=>{const g=grpItems(setBase(v));return [...new Set(g.map(x=>x.part))].map(p=>z[p]).filter(x=>x&&g.some(y=>y.id==x)).map(Number)};
 const optList=(av,sel,showLeft)=>{const seen={},out={costume:[],shirt:[],other:[]};
- av.forEach(i=>{if(i.part){const k=i.kind+'|'+i.name;if(seen[k])return;seen[k]=1;
-   const full=grpItems(i.id),base=Math.min(...full.map(x=>x.id)),ps=[...new Set(av.filter(x=>x.part&&x.kind==i.kind&&x.name==i.name).map(x=>x.part))].sort(partSort),v='set:'+base;
-   out[i.kind].push(`<option value="${v}" ${sel==v?'selected':''}>${esc(i.name)} — set (${esc(ps.join(' + '))})</option>`)}
+ av.forEach(i=>{if(i.part){const k=i.kind+'|'+gk(i);if(seen[k])return;seen[k]=1;
+   const full=grpItems(i.id),base=Math.min(...full.map(x=>x.id)),ps=[...new Set(av.filter(x=>x.part&&x.kind==i.kind&&gk(x)==gk(i)).map(x=>x.part))].sort(partSort),v='set:'+base;
+   out[i.kind].push(`<option value="${v}" ${sel==v?'selected':''}>${esc(gk(i))} — set (${esc(ps.join(' + '))})</option>`)}
   else out[i.kind].push(`<option value=${i.id} ${sel==i.id?'selected':''}>${esc(lab(i))} — ${i.total-i.out} left</option>`)});
  const og=(k,l)=>out[k].length?`<optgroup label="${l}">${out[k].join('')}</optgroup>`:'';
  return og('costume','Costumes')+og('shirt','Shirts')+og('other','Other items')};
 const partsBox=(v,store,needStock)=>{if(!isSetVal(v))return '';const g=grpItems(setBase(v));if(!g.length)return '';
  const ps=[...new Set(g.map(x=>x.part))].sort(partSort),z=U[store];
- return '<div style="display:grid;gap:12px;margin-top:10px">'+ps.map(p=>{const r=g.filter(x=>x.part==p&&(!needStock||x.total-x.out>0||z[p]==x.id)).sort(szCmp);
-  return `<div><label class=f>${esc(p)} size</label><select data-p="${esc(p)}" onchange="U.${store}[this.dataset.p]=this.value"><option value="">None (skip)</option>${r.map(x=>`<option value=${x.id} ${z[p]==x.id?'selected':''}>${esc(sv(x))} — ${x.total-x.out} left</option>`).join('')}</select></div>`}).join('')+'<p class=mut style="margin:0">Quantity applies to each part you choose.</p></div>'};
+ return '<div style="display:grid;gap:12px;margin-top:10px">'+ps.map(p=>{const req=g.some(x=>x.part==p&&+x.all_parts),r=g.filter(x=>x.part==p&&(!needStock||x.total-x.out>0||z[p]==x.id)).sort((a,b)=>String(a.name).localeCompare(String(b.name),'zh')||szCmp(a,b));
+  return `<div><label class=f>${esc(p)} size</label><select data-p="${esc(p)}" onchange="U.${store}[this.dataset.p]=this.value"><option value="">${req?'Choose size…':'None (skip)'}</option>${r.map(x=>`<option value=${x.id} ${z[p]==x.id?'selected':''}>${esc((x.set_name?x.name+' · ':'')+sv(x))} — ${x.total-x.out} left</option>`).join('')}</select></div>`}).join('')+'<p class=mut style="margin:0">Quantity applies to each part you choose.</p></div>'};
 function pickItem(v){U.item=v;U.pz={};$('#parts').innerHTML=partsBox(v,'pz',1)}
 function pickPlanItem(v){U.xi=v;U.xz={};$('#xparts').innerHTML=partsBox(v,'xz',0)}
 
@@ -201,6 +202,7 @@ async function addPlan(){const m=$('#xm').value,i=$('#xi').value,q=Number($('#xq
  if(!U.perf)return alert('Create a performance first (tap + New).');if(!m)return alert('Choose a member.');if(!i)return alert('Choose an item.');
  if(!Number.isSafeInteger(q)||q<1)return alert('Quantity must be a whole number greater than zero.');
  const ids=isSetVal(i)?partIds(i,U.xz):[+i];if(!ids.length)return alert('Choose at least one size for this set.');
+ if(isSetVal(i)&&reqMissing(i,U.xz))return alert('Choose a size for every part of this set.');
  U.xm=m;let bad=0;
  for(const id of ids){const r=await api({a:'plan_save',perf_id:+U.perf,member_id:+m,item_id:id,qty:q,note:U.xn});if(r.err){alert(r.err);bad=1;break}}
  await load();if(!bad){toast('Added to plan ✓');U.xi='';U.xz={};U.xq=1;U.xn='';render()}}
@@ -232,6 +234,7 @@ function qty(d){U.qty=Math.max(1,(+$('#qty').value||1)+d);$('#qty').value=U.qty}
 async function give(){const mem=$('#mem').value,item=$('#item').value,btn=document.querySelector('#app button[onclick="give()"]');
  if(!U.perf)return alert('Create a performance first (tap + New).');if(!mem)return alert('Choose a member.');if(!item)return alert('Choose an item.');
  const multi=isSetVal(item),pids=multi?partIds(item,U.pz):[];if(multi&&!pids.length)return alert('Choose at least one size for this set.');
+ if(multi&&reqMissing(item,U.pz))return alert('Choose a size for every part of this set.');
  const quantity=Number($('#qty').value);if(!Number.isSafeInteger(quantity)||quantity<1)return alert('Quantity must be a whole number greater than zero.');
  let at;const ot=$('#odt');if(ot&&ot.dataset.t&&ot.value){const dd=new Date(ot.value);if(isNaN(dd))return alert('Check the check-out date.');at=dd.toISOString()}
  if(btn){if(btn.disabled)return;btn.disabled=true;btn.textContent='Saving…'}
@@ -280,14 +283,14 @@ v.other=()=>{const t=S.items.filter(i=>!i.archived&&i.kind=='other'),sum=k=>t.re
 ${cats().length?`<select style="margin-top:10px" onchange="U.sc=this.value;$('#lst').innerHTML=olist()"><option value="">All categories</option>${cats().map(c=>`<option ${U.sc==c?'selected':''}>${esc(c)}</option>`).join('')}</select>`:''}
 <label class=chk><input type=checkbox ${U.arch?'checked':''} onchange="U.arch=this.checked?1:0;$('#lst').innerHTML=olist()">Show archived</label><div id=lst style="margin-top:8px">${olist()}</div></div>`};
 const openCat=id=>openForm(0,{category:it(id).category||''});
-const openGrp=(id,np)=>{const i=it(id);openForm(0,{name:i.name,remarks:i.remarks||'',category:i.category||'',part:np?'':(i.part||'')})};
+const openGrp=(id,np)=>{const i=it(id),other=np&&i.set_name;openForm(0,{name:other?'':i.name,remarks:other?'':(i.remarks||''),category:other?'':(i.category||''),part:np?'':(i.part||''),set_name:i.set_name||'',all_parts:+i.all_parts||0})};
 const sizeRow=()=>'<div class=sz><input placeholder="Size"><input placeholder="Colour"><input type=number min=0 placeholder="Qty"><button class="btn ghost sm" onclick="this.parentNode.remove()">✕</button></div>';
 const addSize=()=>{$('#szs').insertAdjacentHTML('beforeend',sizeRow())};
 function openForm(id,pre){const s=U.sub,t=s=='members'?'members':s=='perfs'?'perfs':'items',row=id?{...(t=='members'?mb(id):t=='perfs'?pf(id):it(id))}:(s=='perfs'?{date:today()}:pre||{});U.edit={t,row,s};
  const fd=(k,l,ty='text',x='')=>`<div><label class=f>${l}</label><input id=m_${k} type=${ty} value="${esc(row[k])}" ${x}></div>`;
  const pinf=(l,i,ph='')=>`<div><label class=f>${l}</label><input id=${i} type=password inputmode=numeric autocomplete=new-password placeholder="${ph}"></div>`;
  const nm=s=='shirt'?'Name / design *':s=='other'?'Item name *':'Name *',cf=fd('category','Category','text','list=cats placeholder="e.g. Top, Under layer, Skirt, Accessory"')+`<datalist id=cats>${cats(s=='other'?'o':'c').map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
- const pt=(s=='costume'||s=='shirt')?fd('part','Part (optional)','text','list=partlist placeholder="Top, Pants… leave blank for one-piece"')+`<datalist id=partlist>${[...new Set(['Top','Pants',...S.items.map(i=>i.part).filter(Boolean)])].map(p=>`<option value="${esc(p)}">`).join('')}</datalist>`:'';
+ const pt=(s=='costume'||s=='shirt')?fd('part','Part (optional)','text','list=partlist placeholder="Top, Pants, Ribbon… blank = one-piece"')+fd('set_name','Set name (optional)','text','placeholder="e.g. 共鸣 Gongming — items given together"')+`<label class=chk><input type=checkbox id=m_allp ${+row.all_parts?'checked':''}>Required in the set (cannot be skipped)</label><datalist id=partlist>${[...new Set(['Top','Pants',...S.items.map(i=>i.part).filter(Boolean)])].map(p=>`<option value="${esc(p)}">`).join('')}</datalist>`:'';
  const fl=t=='members'?fd('name','Name *')+fd('student_id','Student ID 学号')+fd('wechat','WeChat')+fd('role','Role','text','list=roles placeholder="drummer, committee…"')+'<datalist id=roles><option>drummer<option>committee</datalist>'
   :t=='perfs'?fd('name','Performance name *')+fd('date','Date','date')+(id?(row.has_pin?pinf('Current PIN (only needed to change it)','m_oldpin')+pinf('New PIN, 4–8 digits (leave blank to keep)','m_pin'):pinf('Set a return PIN (4–8 digits)','m_pin','Not set yet')):pinf('Return PIN * (4–8 digits)','m_pin','Needed to approve returns'))
   :id?fd('name',nm)+cf+pt+fd('color','Colour (optional)')+fd('size','Size (blank = One size)')+fd('total','Total quantity','number','min=0')+fd('remarks','Remarks')
@@ -299,7 +302,8 @@ ${id?`<div class=row style="margin-top:16px;padding-top:16px;border-top:1px soli
  setTimeout(()=>{const e=$('#m_name');e&&(!id&&!(pre&&pre.name))&&e.focus()},60)}
 const closeM=()=>$('#modal').innerHTML='';
 async function saveForm(again){const {t,row,s}=U.edit,r={...row},isNew=!row.id;
- ['name','student_id','wechat','role','date','size','total','remarks','category','color','part'].forEach(k=>{const e=$('#m_'+k);if(e)r[k]=e.type=='number'?Number(e.value):e.value.trim()});
+ ['name','student_id','wechat','role','date','size','total','remarks','category','color','part','set_name'].forEach(k=>{const e=$('#m_'+k);if(e)r[k]=e.type=='number'?Number(e.value):e.value.trim()});
+ {const ap=$('#m_allp');if(ap)r.all_parts=ap.checked?1:0}
  if(!r.name)return alert('Name is required.');if(t=='perfs'&&!r.date)return alert('Date is required.');
  if(t=='items'&&!isNew&&(!Number.isSafeInteger(r.total)||r.total<0))return alert('Total quantity must be a whole number of zero or more.');
  if(t=='items'&&!isNew&&r.total<(Number(row.out)||0))return alert('Total quantity cannot be lower than the number of items currently checked out.');
@@ -314,10 +318,10 @@ async function saveForm(again){const {t,row,s}=U.edit,r={...row},isNew=!row.id;
   if(rows.some(x=>x.qty!==''&&(!Number.isInteger(Number(x.qty))||Number(x.qty)<0)))return alert('Total quantity must be a whole number of zero or more.');
   if(!rows.length)return alert('Enter at least one variation with a quantity (leave size blank for "One size").');
   for(const x of rows){const sz=x.size||'One size';if(S.items.some(i=>!i.archived&&i.kind==s&&i.name==r.name&&i.size==sz&&(i.color||'')==x.color&&(i.part||'')==(r.part||'')))return alert(r.name+' · '+[r.part,x.color,sz].filter(Boolean).join(' · ')+' already exists. Close this and tap Edit on it instead.')}
-  for(const x of rows)await api({a:'save',t:'items',row:{name:r.name,category:r.category||'',remarks:r.remarks||'',kind:s,size:x.size||'One size',color:x.color,part:r.part||'',total:+x.qty||0,archived:0}});
+  for(const x of rows)await api({a:'save',t:'items',row:{name:r.name,category:r.category||'',remarks:r.remarks||'',kind:s,size:x.size||'One size',color:x.color,part:r.part||'',set_name:r.set_name||'',all_parts:r.all_parts||0,total:+x.qty||0,archived:0}});
   await load();toast('Saved ✓');closeM();if(again)openForm();return}
  if(t=='members')r.active??=1;else if(t=='items'){r.archived??=0;r.kind=row.kind||s;r.size=r.size||'One size'}
- if(t=='items'&&!isNew&&(row.category||'')!==(r.category||'')){for(const x of S.items.filter(i=>i.kind==row.kind&&i.name==row.name&&i.id!=row.id))await api({a:'save',t:'items',row:{...x,category:r.category||''}})}
+ if(t=='items'&&!isNew&&['category','set_name','part'].some(k=>(row[k]||'')!==(r[k]||''))||t=='items'&&!isNew&&(+row.all_parts||0)!==(+r.all_parts||0)){for(const x of S.items.filter(i=>i.kind==row.kind&&i.name==row.name&&i.id!=row.id))await api({a:'save',t:'items',row:{...x,category:r.category||'',set_name:r.set_name||'',all_parts:+r.all_parts||0,part:(x.part||'')==(row.part||'')?(r.part||''):x.part}})}
  await act({a:'save',t,row:r},'Saved ✓');
  closeM();if(again)openForm()}
 async function flip(){const {t,row}=U.edit,r={...row};t=='members'?r.active=r.active?0:1:r.archived=r.archived?0:1;closeM();await act({a:'save',t,row:r},'Updated ✓')}
